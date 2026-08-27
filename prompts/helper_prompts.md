@@ -1,4 +1,4 @@
-﻿# ObsidianTrace: Helper Prompt Templates
+﻿# NetSage AI: Helper Prompt Templates
 
 This library provides specialized sub-prompts for modular diagnostic tasks.
 

@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace: Command Line Interface (CLI)
+NetSage AI: Command Line Interface (CLI)
 Interactive and Batch Network Troubleshooting Helper for Cisco Packet Tracer Labs.
 Powered by Groq High-Speed LLM Inference (Llama 3.3 70B / Llama 3.1 8B) & Local CCIE Expert Engine.
 """
@@ -98,7 +98,7 @@ def run_interactive_chat(engine, model=None):
                 user_input = "PC-2 in VLAN 20 cannot ping default gateway 192.168.20.1 on Router subinterface G0/0.20."
                 print(f"[Sample Query]: {user_input}")
 
-            print("\nAnalyzing with ObsidianTrace & Groq Engine...")
+            print("\nAnalyzing with NetSage AI & Groq Engine...")
             res = engine.troubleshoot_chat(
                 user_message=user_input,
                 history=history,
@@ -113,7 +113,7 @@ def run_interactive_chat(engine, model=None):
             break
 
 def run_all_cases(engine, cases, use_llm=False, model=None):
-    print("\n[BATCH EVALUATION] Running ObsidianTrace against all 35 Lab Cases...\n")
+    print("\n[BATCH EVALUATION] Running NetSage AI against all 35 Lab Cases...\n")
     header = f"{'Case ID':<9} | {'Domain':<22} | {'OSI Layer':<12} | {'AI Confidence':<14} | {'Deterministic Pre-Check':<24} | {'Status'}"
     print(header)
     print("-" * len(header))
@@ -135,7 +135,7 @@ def run_all_cases(engine, cases, use_llm=False, model=None):
 
 def main():
     print_banner()
-    parser = argparse.ArgumentParser(description="ObsidianTrace: Cisco Packet Tracer Troubleshooting Assistant")
+    parser = argparse.ArgumentParser(description="NetSage AI: Cisco Packet Tracer Troubleshooting Assistant")
     parser.add_argument("--case", type=str, help="Diagnose a specific case (e.g. NET-001)")
     parser.add_argument("--chat", action="store_true", help="Launch interactive Cisco Packet Tracer chat assistant in terminal")
     parser.add_argument("--run-all", action="store_true", help="Run batch diagnosis over all 35 lab cases")

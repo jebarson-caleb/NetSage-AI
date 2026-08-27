@@ -1,5 +1,5 @@
 ﻿"""
-Unit Tests for ObsidianTrace Deterministic Rule Checker
+Unit Tests for NetSage AI Deterministic Rule Checker
 Validates that all 12+ static sanity rules catch the correct network anomalies.
 """
 

@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace Engine Package
+NetSage AI Engine Package
 """
 from engine.rule_checker import NetworkRuleChecker, RuleViolation
 from engine.ai_engine import DiagnosticEngine

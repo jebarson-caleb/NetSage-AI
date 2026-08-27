@@ -1,5 +1,5 @@
 ﻿"""
-Integration Tests for ObsidianTrace End-to-End Diagnostic Pipeline
+Integration Tests for NetSage AI End-to-End Diagnostic Pipeline
 Validates diagnostic engine, rule checker, human review state machine, and simulator.
 """
 

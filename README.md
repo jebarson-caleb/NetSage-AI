@@ -1,4 +1,4 @@
-﻿# ObsidianTrace
+﻿# NetSage AI
 
 **Cisco Packet Tracer — Editorial Network Intelligence.** Evidence-first AI troubleshooting for Packet Tracer labs: 30 deterministic rule checks, Groq-powered reasoning (Llama 3.3 70B), and a mandatory human-in-the-loop workflow before any remediation ships.
 
@@ -29,8 +29,8 @@
 ## Installation
 
 ```bash
-git clone https://github.com/jebarson-caleb/ObsidianTrace.git
-cd ObsidianTrace
+git clone https://github.com/jebarson-caleb/NetSage-AI.git
+cd NetSage-AI
 
 # Optional: create venv (server runs with stdlib only)
 python -m venv venv
@@ -55,7 +55,7 @@ copy .env.example .env   # Windows
 ```
 GROQ_API_KEY=gsk_your_groq_api_key_here
 GROQ_MODEL=openai/gpt-oss-120b
-OBSIDIANTRACE_PROVIDER=groq   # groq | local | gemini | openai
+NETSAGE_PROVIDER=groq   # groq | local | gemini | openai
 # GEMINI_API_KEY=...
 # OPENAI_API_KEY=...
 PORT=8000
@@ -63,10 +63,10 @@ PORT=8000
 
 - `GROQ_API_KEY` — free at https://console.groq.com/keys
 - `GROQ_MODEL` — any Groq model (default `llama-3.3-70b-versatile`)
-- `OBSIDIANTRACE_PROVIDER` — routing for `DiagnosticEngine` (legacy `NETSAGE_PROVIDER` still honored)
+- `NETSAGE_PROVIDER` — routing for `DiagnosticEngine` (legacy `NETSAGE_PROVIDER` still honored)
 - `PORT` — web server port
 
-The web UI also stores `obsidiantrace_provider`, `obsidiantrace_groq_model`, `obsidiantrace_groq_api_key`, and `obsidiantrace_reviewer` in `localStorage` (with fallback to legacy `netsage_*` keys).
+The web UI also stores `netsage_provider`, `netsage_groq_model`, `netsage_groq_api_key`, and `netsage_reviewer` in `localStorage` (with fallback to legacy `netsage_*` keys).
 
 ## Development
 
@@ -112,7 +112,7 @@ python cli.py --stats
 ## Project Structure
 
 ```
-ObsidianTrace/
+NetSage AI/
 ├── data/
 │   ├── cases.json                 # 35 structured Packet Tracer cases
 │   ├── cases.csv                  # CSV export
@@ -148,4 +148,4 @@ ObsidianTrace/
 
 ## License
 
-No license file was present in the original NetSage-AI repository. This rebrand (ObsidianTrace) retains the original authorship where applicable and is provided as-is for educational use. If you fork, add a `LICENSE` (e.g., MIT) and preserve any attribution required by the original source at `https://github.com/abishek-vk/NetSage-AI`.
+No license file was present in the original NetSage-AI repository. This rebrand (NetSage AI) retains the original authorship where applicable and is provided as-is for educational use. If you fork, add a `LICENSE` (e.g., MIT) and preserve any attribution required by the original source at `https://github.com/abishek-vk/NetSage-AI`.

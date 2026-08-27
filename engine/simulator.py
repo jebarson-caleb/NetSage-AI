@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace: Cisco Packet Tracer Fix & Verification Simulator
+NetSage AI: Cisco Packet Tracer Fix & Verification Simulator
 Simulates terminal command execution, remediation script application, and post-fix ping connectivity tests.
 """
 

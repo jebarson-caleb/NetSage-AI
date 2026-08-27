@@ -1,5 +1,5 @@
 ﻿"""
-Dataset Builder for ObsidianTrace: Generates 35 comprehensive, realistic Cisco Packet Tracer troubleshooting cases.
+Dataset Builder for NetSage AI: Generates 35 comprehensive, realistic Cisco Packet Tracer troubleshooting cases.
 Outputs:
 - data/cases.json (Rich structured JSON)
 - data/cases.csv (Standard CSV export for tabular inspection and grading)

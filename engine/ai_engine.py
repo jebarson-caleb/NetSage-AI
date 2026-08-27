@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace: Diagnostic Intelligence Engine & Orchestrator
+NetSage AI: Diagnostic Intelligence Engine & Orchestrator
 Combines Deterministic Rule Pre-Scanning with Advanced AI Diagnostic Reasoning.
 Supports Native Groq API (Llama 3.3 70B Versatile, Llama 3.1 8B Instant), Local CCIE Expert Engine (Offline), Gemini, and OpenAI.
 """
@@ -45,7 +45,7 @@ class DiagnosticEngine:
         env_groq = os.environ.get("GROQ_API_KEY", "")
         env_gemini = os.environ.get("GEMINI_API_KEY", "")
         env_openai = os.environ.get("OPENAI_API_KEY", "")
-        env_obsidiantrace = os.environ.get("OBSIDIANTRACE_API_KEY", "") or os.environ.get("OBSIDIANTRACE_API_KEY", "") or os.environ.get("NETSAGE_API_KEY", "")
+        env_netsage = os.environ.get("NETSAGE_API_KEY", "") or os.environ.get("NETSAGE_API_KEY", "") or os.environ.get("NETSAGE_API_KEY", "")
 
         if api_key:
             self.api_key = api_key
@@ -56,7 +56,7 @@ class DiagnosticEngine:
         elif self.provider == "openai" and env_openai:
             self.api_key = env_openai
         else:
-            self.api_key = env_groq or GROQ_FALLBACK_KEY or env_obsidiantrace or env_gemini or env_openai or ""
+            self.api_key = env_groq or GROQ_FALLBACK_KEY or env_netsage or env_gemini or env_openai or ""
 
         # Default model selection
         if model_name:
@@ -64,9 +64,9 @@ class DiagnosticEngine:
         elif self.provider == "groq":
             self.model_name = os.environ.get("GROQ_MODEL", GROQ_DEFAULT_MODEL)
         elif self.provider == "gemini":
-            self.model_name = os.environ.get("OBSIDIANTRACE_MODEL", os.environ.get("NETSAGE_MODEL", "gemini-2.5-flash"))
+            self.model_name = os.environ.get("NETSAGE_MODEL", os.environ.get("NETSAGE_MODEL", "gemini-2.5-flash"))
         elif self.provider == "openai":
-            self.model_name = os.environ.get("OBSIDIANTRACE_MODEL", os.environ.get("NETSAGE_MODEL", "gpt-4o-mini"))
+            self.model_name = os.environ.get("NETSAGE_MODEL", os.environ.get("NETSAGE_MODEL", "gpt-4o-mini"))
         else:
             self.model_name = "ccie-local-expert"
 
@@ -145,7 +145,7 @@ class DiagnosticEngine:
         prompt = self._build_prompt_payload(case, rule_findings)
         
         system_instruction = (
-            "You are ObsidianTrace, a specialized Cisco CCIE troubleshooting expert for Cisco Packet Tracer labs. "
+            "You are NetSage AI, a specialized Cisco CCIE troubleshooting expert for Cisco Packet Tracer labs. "
             "Analyze the given symptom, topology, show-command outputs, and deterministic rule checker findings. "
             "Treat supplied CLI as the source of truth: a missing line is evidence only when the relevant complete "
             "configuration section or command output is present. Separate CONFIRMED and POSSIBLE causes, and never "
@@ -161,7 +161,7 @@ class DiagnosticEngine:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
-            "User-Agent": "ObsidianTrace/2.0"
+            "User-Agent": "NetSage AI/2.0"
         }
 
         chosen_model = model or GROQ_DEFAULT_MODEL
@@ -196,7 +196,7 @@ class DiagnosticEngine:
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {"response_mime_type": "application/json"}
         }
-        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={"Content-Type": "application/json", "User-Agent": "ObsidianTrace/2.0"})
+        req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={"Content-Type": "application/json", "User-Agent": "NetSage AI/2.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             raw_text = data['candidates'][0]['content']['parts'][0]['text']
@@ -209,12 +209,12 @@ class DiagnosticEngine:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
-            "User-Agent": "ObsidianTrace/2.0"
+            "User-Agent": "NetSage AI/2.0"
         }
         payload = {
             "model": model or "gpt-4o-mini",
             "messages": [
-                {"role": "system", "content": "You are ObsidianTrace, a Cisco Packet Tracer CCIE troubleshooter. Respond strictly with valid JSON."},
+                {"role": "system", "content": "You are NetSage AI, a Cisco Packet Tracer CCIE troubleshooter. Respond strictly with valid JSON."},
                 {"role": "user", "content": prompt}
             ],
             "response_format": {"type": "json_object"}
@@ -292,7 +292,7 @@ Return strictly a JSON object matching this schema:
 
         # Formulate full conversation for Groq
         system_prompt = (
-            "You are ObsidianTrace, an expert Cisco Certified Network Associate/Professional (CCNA/CCNP) instructor and Packet Tracer troubleshooter. "
+            "You are NetSage AI, an expert Cisco Certified Network Associate/Professional (CCNA/CCNP) instructor and Packet Tracer troubleshooter. "
             "You assist students and engineers in diagnosing broken Cisco Packet Tracer topologies. "
             "Treat supplied CLI as the source of truth and never invent missing output or configuration. "
             "Only call a cause CONFIRMED when exact supplied evidence supports it; otherwise label it POSSIBLE and lower confidence. "
@@ -333,7 +333,7 @@ Return strictly a JSON object matching this schema:
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {active_key}",
-                    "User-Agent": "ObsidianTrace/2.0"
+                    "User-Agent": "NetSage AI/2.0"
                 }
                 payload = {
                     "model": active_model,
@@ -359,7 +359,7 @@ Return strictly a JSON object matching this schema:
         # Fallback local conversational response
         local_diag = self._local_expert_reasoner(virtual_case, rule_findings)
         fallback_reply = (
-            f"### ⚡ ObsidianTrace Packet Tracer Diagnosis (CCIE Local Engine)\n\n"
+            f"### ⚡ NetSage AI Packet Tracer Diagnosis (CCIE Local Engine)\n\n"
             f"**🎯 Identified Fault**: {local_diag.get('fault_summary')}\n"
             f"**🌐 OSI Layer**: `{local_diag.get('osi_layer')}` | **Category**: `{local_diag.get('concept_tag')}`\n"
             f"**📊 Confidence**: {int(local_diag.get('confidence', 0.9) * 100)}%\n\n"
@@ -390,7 +390,7 @@ Return strictly a JSON object matching this schema:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {key_to_test}",
-            "User-Agent": "ObsidianTrace/2.0"
+            "User-Agent": "NetSage AI/2.0"
         }
 
         # Step 1: Discover available models
@@ -414,7 +414,7 @@ Return strictly a JSON object matching this schema:
 
         payload = {
             "model": test_model,
-            "messages": [{"role": "user", "content": "Respond with 'OBSIDIANTRACE_OK'"}],
+            "messages": [{"role": "user", "content": "Respond with 'NETSAGE_OK'"}],
             "max_tokens": 10
         }
         req = urllib.request.Request(GROQ_API_URL, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")

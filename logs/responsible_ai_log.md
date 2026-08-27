@@ -1,4 +1,4 @@
-﻿# ObsidianTrace: Responsible AI Audit Log & Human Review Case Studies
+﻿# NetSage AI: Responsible AI Audit Log & Human Review Case Studies
 
 > [!IMPORTANT]
 > **Safety Rule Enforcement**: In enterprise network operations, AI recommendations must never be applied autonomously. This log documents **7 real-world troubleshooting scenarios** where initial AI diagnoses were caught, corrected, or rejected by human reviewers prior to deployment.

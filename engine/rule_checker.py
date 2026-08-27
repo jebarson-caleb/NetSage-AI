@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace: Deterministic Network Rule Checker
+NetSage AI: Deterministic Network Rule Checker
 Performs static analysis and semantic syntax validation on Cisco IOS show command outputs and configurations.
 Detects common configuration mistakes with 100% determinism.
 """

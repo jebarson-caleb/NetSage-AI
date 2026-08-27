@@ -1,5 +1,5 @@
 ﻿/**
- * ObsidianTrace — Enterprise Network Troubleshooting Platform
+ * NetSage AI — Enterprise Network Troubleshooting Platform
  * Application Logic & Controller
  */
 
@@ -14,12 +14,12 @@ let state = {
   assistantDiagnosis: null,
   charts: {},
   settings: {
-    provider: localStorage.getItem('obsidiantrace_provider') || localStorage.getItem('netsage_provider') || 'groq',
-    groqModel: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'].includes(localStorage.getItem('obsidiantrace_groq_model') || localStorage.getItem('netsage_groq_model'))
-      ? (localStorage.getItem('obsidiantrace_groq_model') || localStorage.getItem('netsage_groq_model'))
+    provider: localStorage.getItem('netsage_provider') || localStorage.getItem('netsage_provider') || 'groq',
+    groqModel: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'].includes(localStorage.getItem('netsage_groq_model') || localStorage.getItem('netsage_groq_model'))
+      ? (localStorage.getItem('netsage_groq_model') || localStorage.getItem('netsage_groq_model'))
       : 'openai/gpt-oss-120b',
-    apiKey: localStorage.getItem('obsidiantrace_groq_api_key') || localStorage.getItem('netsage_groq_api_key') || '',
-    reviewerName: localStorage.getItem('obsidiantrace_reviewer') || localStorage.getItem('netsage_reviewer') || 'Alex Rivera (Lead Network Engineer)'
+    apiKey: localStorage.getItem('netsage_groq_api_key') || localStorage.getItem('netsage_groq_api_key') || '',
+    reviewerName: localStorage.getItem('netsage_reviewer') || localStorage.getItem('netsage_reviewer') || 'Alex Rivera (Lead Network Engineer)'
   }
 };
 

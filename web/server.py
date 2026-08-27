@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace: Web Backend REST API Server
+NetSage AI: Web Backend REST API Server
 Built with Python standard library ThreadingHTTPServer for zero-dependency instant execution.
 Serves REST API endpoints for Packet Tracer AI diagnostics, Groq LLM reasoning, interactive chat, rule checks, human reviews, stats, and static UI assets.
 """
@@ -73,7 +73,7 @@ PACKET_TRACER_PRESETS = [
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
-class ObsidianTraceHandler(SimpleHTTPRequestHandler):
+class NetSageHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.engine = DiagnosticEngine()
         self.rule_checker = NetworkRuleChecker()
@@ -120,7 +120,7 @@ class ObsidianTraceHandler(SimpleHTTPRequestHandler):
         if path == "/api/health":
             self._send_json({
                 "status": "healthy",
-                "service": "ObsidianTrace Cisco Packet Tracer Assistant",
+                "service": "NetSage AI Cisco Packet Tracer Assistant",
                 "version": "2.2",
                 "default_provider": self.engine.provider,
                 "groq_configured": bool(self.engine.api_key and "gsk" in self.engine.api_key)
@@ -288,9 +288,9 @@ class ObsidianTraceHandler(SimpleHTTPRequestHandler):
 
 def run_server(port=8000):
     server_address = ("", port)
-    httpd = ThreadedHTTPServer(server_address, ObsidianTraceHandler)
+    httpd = ThreadedHTTPServer(server_address, NetSageHandler)
     print(f"============================================================")
-    print(f" ObsidianTrace Cisco Packet Tracer Troubleshooter Active")
+    print(f" NetSage AI Cisco Packet Tracer Troubleshooter Active")
     print(f" Web Platform Running at http://localhost:{port}")
     print(f" Groq AI Engine: Native Ultra-Fast Llama-3.3 Reasoning Enabled")
     print(f"============================================================")

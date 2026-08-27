@@ -1,4 +1,4 @@
-﻿# ObsidianTrace: Dependencies
+﻿# NetSage AI: Dependencies
 # Core platform runs with zero external dependencies using Python 3.8+ Standard Library!
 # Optional packages for development and extended capabilities:
 pandas>=2.0.0

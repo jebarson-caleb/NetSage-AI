@@ -1,5 +1,5 @@
 ﻿"""
-ObsidianTrace: Human-in-the-Loop Review Manager & Responsible AI Safety Module
+NetSage AI: Human-in-the-Loop Review Manager & Responsible AI Safety Module
 Enforces mandatory human verification on all AI diagnoses and maintains persistent audit trails.
 """
 
