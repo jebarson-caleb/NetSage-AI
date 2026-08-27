@@ -72,10 +72,16 @@ async function loadInitialData() {
     if (countEl) countEl.textContent = state.cases.length;
     const navCountEl = document.getElementById('navCaseCount');
     if (navCountEl) navCountEl.textContent = state.cases.length;
+    const ctrlCase = document.getElementById('ctrlCaseCount');
+    if (ctrlCase) ctrlCase.textContent = state.cases.length;
     const heroCases = document.getElementById('heroCases');
     if (heroCases) heroCases.textContent = state.cases.length;
+    const ctrlRev = document.getElementById('ctrlReviewCount');
+    if (ctrlRev) ctrlRev.textContent = Object.keys(state.reviews).length;
 
     renderPresets();
+    renderRecentActivity();
+    setupViewToggle();
     checkGroqStatus();
   } catch (err) {
     console.error('Failed to load initial data:', err);
@@ -101,10 +107,12 @@ function loadSavedSettingsIntoUI() {
 function setupNavigation() {
   const sidebarItems = document.querySelectorAll('.sidebar-item');
   const navLinks = document.querySelectorAll('.nav-link');
-  const allNav = [...sidebarItems, ...navLinks];
+  const controlPills = document.querySelectorAll('.control-pill');
+  const allNav = [...sidebarItems, ...navLinks, ...controlPills];
   function activate(targetId) {
     sidebarItems.forEach(i => i.classList.toggle('active', i.getAttribute('data-target') === targetId));
     navLinks.forEach(n => n.classList.toggle('active', n.getAttribute('data-target') === targetId));
+    controlPills.forEach(c => c.classList.toggle('active', c.getAttribute('data-target') === targetId));
     document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === targetId));
     const breadcrumb = document.getElementById('headerBreadcrumb');
     if (breadcrumb) {
@@ -113,11 +121,11 @@ function setupNavigation() {
     }
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('active');
+    window.scrollTo({top:0, behavior:'smooth'});
   }
   allNav.forEach(item => {
     item.addEventListener('click', () => activate(item.getAttribute('data-target')));
   });
-  // expose for footer/hero
   window._activateNav = activate;
 }
 
@@ -145,8 +153,10 @@ function navigateToPage(targetId) {
   if (window._activateNav) return window._activateNav(targetId);
   const items = document.querySelectorAll('.sidebar-item');
   const navLinks = document.querySelectorAll('.nav-link');
+  const controlPills = document.querySelectorAll('.control-pill');
   items.forEach(i => i.classList.toggle('active', i.getAttribute('data-target')===targetId));
   navLinks.forEach(n => n.classList.toggle('active', n.getAttribute('data-target')===targetId));
+  controlPills.forEach(c => c.classList.toggle('active', c.getAttribute('data-target')===targetId));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id===targetId));
   const breadcrumb = document.getElementById('headerBreadcrumb');
   if (breadcrumb) breadcrumb.innerHTML = `<strong>${PAGE_TITLES[targetId]||targetId}</strong> — Cisco Packet Tracer troubleshooting`;
@@ -274,8 +284,10 @@ function renderAllViews() {
   updateKpiBanner();
   renderAnalyticsCharts();
   renderCaseTable();
+  renderCaseGrid();
   renderReviewTable();
   renderResponsibleAiLog();
+  renderRecentActivity();
 }
 
 function updateKpiBanner() {
@@ -452,8 +464,8 @@ function filterCases() {
   const query = document.getElementById('caseSearchInput').value.toLowerCase();
   const layer = document.getElementById('layerFilter').value;
   const sev = document.getElementById('severityFilter').value;
-
   const rows = document.querySelectorAll('#caseTableBody tr');
+  const cards = document.querySelectorAll('#caseGrid .case-card');
   state.cases.forEach((c, idx) => {
     const matchesSearch = c.case_id.toLowerCase().includes(query) ||
                           c.title.toLowerCase().includes(query) ||
@@ -461,9 +473,56 @@ function filterCases() {
                           c.domain.toLowerCase().includes(query);
     const matchesLayer = !layer || c.osi_layer.includes(layer);
     const matchesSev = !sev || c.severity === sev;
-    if (rows[idx]) {
-      rows[idx].style.display = (matchesSearch && matchesLayer && matchesSev) ? '' : 'none';
-    }
+    const vis = (matchesSearch && matchesLayer && matchesSev) ? '' : 'none';
+    if (rows[idx]) rows[idx].style.display = vis;
+    if (cards[idx]) cards[idx].style.display = vis;
+  });
+}
+function renderCaseGrid() {
+  const grid = document.getElementById('caseGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  state.cases.forEach(c => {
+    const review = state.reviews[c.case_id];
+    const status = review ? review.decision.toLowerCase() : 'pending';
+    const card = document.createElement('div');
+    card.className = 'case-card';
+    card.innerHTML = `
+      <div class="case-card-top"><span class="case-card-id">${escapeHtml(c.case_id)}</span><span class="case-card-sev badge badge-severity-${c.severity.toLowerCase()}">${escapeHtml(c.severity)}</span></div>
+      <div class="case-card-title">${escapeHtml(c.title)}</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;"><span class="badge badge-blue">${escapeHtml(c.domain)}</span><span class="badge badge-gray">${escapeHtml(c.osi_layer)}</span><span class="badge badge-status-${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span></div>
+      <div class="case-card-desc">${escapeHtml(c.symptom)}</div>
+      <div style="margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="goToAssistantCase('${c.case_id}')">Diagnose →</button></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+function setupViewToggle(){
+  const btns=document.querySelectorAll('.view-toggle-btn');
+  const tableWrap=document.getElementById('caseTableWrap');
+  const grid=document.getElementById('caseGrid');
+  if(!btns.length) return;
+  btns.forEach(b=>{
+    b.addEventListener('click',()=>{
+      btns.forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const view=b.getAttribute('data-view');
+      if(tableWrap) tableWrap.style.display = view==='table' ? '' : 'none';
+      if(grid) grid.style.display = view==='grid' ? 'grid' : 'none';
+    });
+  });
+}
+function renderRecentActivity(){
+  const list=document.getElementById('recentActivityList');
+  if(!list) return;
+  const audits=Object.values(state.reviews).sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp)).slice(0,3);
+  if(audits.length===0){ list.innerHTML='<div class="text-xs text-muted" style="font-family:var(--font-mono);">No reviews yet — run a diagnosis and submit to review.</div>'; return; }
+  list.innerHTML='';
+  audits.forEach(r=>{
+    const el=document.createElement('div');
+    el.className='recent-activity-item';
+    el.innerHTML=`<div class="recent-activity-dot"></div><div><div style="font-weight:600;">${escapeHtml(r.case_id)} — ${escapeHtml(r.decision)} by ${escapeHtml(r.reviewer)}</div><div class="recent-activity-meta">${escapeHtml(r.timestamp)} · ${escapeHtml(r.error_category||'None')}</div><div style="font-size:12px; margin-top:4px; color:var(--text-secondary);">${escapeHtml((r.reviewer_notes||'').slice(0,90))}</div></div>`;
+    list.appendChild(el);
   });
 }
 
@@ -674,6 +733,11 @@ async function submitReviewVerdict() {
     state.stats = statsRes;
     updateKpiBanner();
     renderReviewTable();
+    renderCaseTable();
+    renderCaseGrid();
+    renderRecentActivity();
+    const ctrlRev2=document.getElementById('ctrlReviewCount');
+    if(ctrlRev2) ctrlRev2.textContent = Object.keys(state.reviews).length;
     navigateToPage('page-review');
     showToast(`Review "${decision}" saved for ${state.currentCase.case_id}`);
   } catch (err) {
@@ -764,16 +828,16 @@ function renderPresets() {
     return;
   }
 
-  state.presets.forEach(preset => {
-    const chip = document.createElement('button');
-    chip.className = 'preset-chip';
-    chip.textContent = preset.title;
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
+  state.presets.forEach((preset, idx) => {
+    const card = document.createElement('button');
+    card.className = 'preset-card';
+    card.innerHTML = `<div class="preset-card-index">[${String(idx+1).padStart(2,'0')}]</div><div class="preset-card-title">${escapeHtml(preset.title)}</div><div class="preset-card-domain">${escapeHtml(preset.domain||'Packet Tracer')}</div>`;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
       loadPresetIntoAssistant(preset);
     });
-    container.appendChild(chip);
+    container.appendChild(card);
   });
 }
 

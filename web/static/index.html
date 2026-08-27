@@ -97,6 +97,15 @@
       </div>
     </header>
 
+    <nav class="control-strip" aria-label="Section navigation">
+      <span class="control-strip-label">Sections —</span>
+      <button class="control-pill active" data-target="page-assistant">Workbench <span class="pill-count">Live</span></button>
+      <button class="control-pill" data-target="page-explorer">Cases <span class="pill-count" id="ctrlCaseCount">35</span></button>
+      <button class="control-pill" data-target="page-overview">Analytics</button>
+      <button class="control-pill" data-target="page-review">Review <span class="pill-count" id="ctrlReviewCount">7</span></button>
+      <button class="control-pill" data-target="page-responsible">Responsible AI</button>
+    </nav>
+
     <div class="content-area">
 
       <!-- ==================== PAGE: TROUBLESHOOTING / WORKBENCH ==================== -->
@@ -114,24 +123,25 @@
             </div>
           </div>
           <div class="hero-meta-right">
-            <div class="hero-stat-grid">
-              <div class="hero-stat"><div class="hero-stat-label">Lab Cases</div><div class="hero-stat-value" id="heroCases">35</div><div class="hero-stat-sub">Packet Tracer scenarios</div></div>
-              <div class="hero-stat"><div class="hero-stat-label">Deterministic Rules</div><div class="hero-stat-value">30</div><div class="hero-stat-sub">Static sanity checks</div></div>
-              <div class="hero-stat"><div class="hero-stat-label">Agreement Rate</div><div class="hero-stat-value" id="heroAgree">80%</div><div class="hero-stat-sub">Accepted / Verified</div></div>
-              <div class="hero-stat"><div class="hero-stat-label">Interventions</div><div class="hero-stat-value">7</div><div class="hero-stat-sub">Responsible AI logged</div></div>
+            <div class="live-console" aria-label="Live console">
+              <div class="live-console-header">
+                <span>Live — Packet Tracer Console</span>
+                <div class="live-console-dots"><div class="live-console-dot r"></div><div class="live-console-dot y"></div><div class="live-console-dot g"></div></div>
+              </div>
+              <div class="live-console-body" id="liveConsoleBody">
+                <div class="live-console-line"><span class="live-console-prompt">Router#</span> show ip interface brief</div>
+                <div class="live-console-line" style="color:#a1a1aa;">GigabitEthernet0/0/0.20 192.168.20.1 YES manual up up</div>
+                <div class="live-console-line"><span class="live-console-prompt">Switch#</span> show interfaces trunk</div>
+                <div class="live-console-line" style="color:#a1a1aa;">Gig0/1  on  802.1q  trunking  Native vlan 10</div>
+                <div class="live-console-line"><span class="live-console-prompt">PC-2></span> ping 192.168.20.1 <span style="color:#22c55e;">!!!</span></div>
+                <div class="live-console-line"><span class="live-console-prompt">AI></span> Verbatim evidence required — <span class="live-console-cursor"></span></div>
+              </div>
             </div>
-            <div class="hero-data-strip">
-              <span class="hero-data-pill">Latency · 12ms</span>
-              <span class="hero-data-pill">Packets · 14k</span>
-              <span class="hero-data-pill">Host · G0/0/0.20</span>
-              <span class="hero-data-pill">Port · 443</span>
-              <span class="hero-data-pill">Status · Pending Review</span>
-              <span class="hero-data-pill">Protocol · OSPF</span>
-              <span class="hero-data-pill">Risk · Low</span>
-              <span class="hero-data-pill">Uptime · 99.9%</span>
-            </div>
-            <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); line-height:1.5; border-top:1px solid var(--border); padding-top:12px;">
-              No neon. No matrix. Just grid, type, and evidence. Every AI fix requires explicit human approval — <strong style="color:var(--text-primary);">reload</strong> and <strong style="color:var(--text-primary);">erase startup-config</strong> are auto-intercepted.
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+              <span style="font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--border); padding:6px 8px; background:#fff;">Latency 12ms</span>
+              <span style="font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--border); padding:6px 8px; background:#fff;">Status · Pending Review</span>
+              <span style="font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--border); padding:6px 8px; background:#fff;" id="heroCasesWrap">Cases <span id="heroCases">35</span></span>
+              <span style="font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--border); padding:6px 8px; background:#fff;">Agreement <span id="heroAgree">80%</span></span>
             </div>
           </div>
         </section>
@@ -168,37 +178,19 @@
 
         <div class="data-bar"><div class="data-bar-inner"><div class="data-bar-item"><span>PACKET</span> 35 CASES</div><div class="data-bar-item"><span>HOST</span> R1 • R2 • CATALYST 2960</div><div class="data-bar-item"><span>PORT</span> G0/0/0.10 / 20 / 30</div><div class="data-bar-item"><span>STATUS</span> PENDING_REVIEW</div><div class="data-bar-item"><span>PROTOCOL</span> OSPF • VLAN • ACL • NAT</div><div class="data-bar-item"><span>RISK</span> LOW / MEDIUM / HIGH</div><div class="data-bar-item"><span>UPTIME</span> LAB_ISOLATED</div></div></div>
 
-        <!-- KPIs -->
-        <div class="kpi-grid" style="margin-top:1px;">
-          <div class="kpi-card">
-            <div class="kpi-card-top"><span class="kpi-label">Lab Cases</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div>
-            <div class="kpi-value" id="kpi-total-cases">35</div>
-            <div class="kpi-sub">Cisco Packet Tracer Scenarios</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card-top"><span class="kpi-label">AI-Human Agreement</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-            <div class="kpi-value" id="kpi-agreement-rate">80.0%</div>
-            <div class="kpi-sub">Accepted / Verified Diagnoses</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card-top"><span class="kpi-label">Human Interventions</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
-            <div class="kpi-value" id="kpi-human-edits">7</div>
-            <div class="kpi-sub">Responsible AI Logged Cases</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-card-top"><span class="kpi-label">Deterministic Rules</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div></div>
-            <div class="kpi-value" id="kpi-rules-count">30</div>
-            <div class="kpi-sub">Static Config Sanity Checks</div>
-          </div>
+        <div class="lab-health-strip">
+          <div class="lab-health-item"><div><div class="lab-health-label">Lab Cases</div><div class="lab-health-sub">Packet Tracer</div></div><div class="lab-health-value" id="kpi-total-cases">35</div></div>
+          <div class="lab-health-item"><div><div class="lab-health-label">Agreement</div><div class="lab-health-sub">Accepted / Verified</div></div><div class="lab-health-value" id="kpi-agreement-rate">80.0%</div></div>
+          <div class="lab-health-item"><div><div class="lab-health-label">Interventions</div><div class="lab-health-sub">Responsible AI</div></div><div class="lab-health-value" id="kpi-human-edits">7</div></div>
+          <div class="lab-health-item"><div><div class="lab-health-label">Rules</div><div class="lab-health-sub">Static checks</div></div><div class="lab-health-value" id="kpi-rules-count">30</div></div>
         </div>
 
-        <!-- Presets -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>Quick Presets — Click to load</div>
-            <span class="text-xs text-muted" style="font-family:var(--font-mono); letter-spacing:0.06em; text-transform:uppercase;">6 lab scenarios</span>
+            <div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>Preset Gallery — 01–06 · Click to load into console</div>
+            <span class="text-xs text-muted" style="font-family:var(--font-mono); letter-spacing:0.06em; text-transform:uppercase;">Horizontal scroll →</span>
           </div>
-          <div class="presets-bar" id="ptPresetsList"></div>
+          <div class="preset-cards" id="ptPresetsList"></div>
         </div>
 
         <!-- Workbench -->
@@ -258,6 +250,17 @@
                 Submit to Human Review
               </button>
             </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-activity" id="recentActivity">
+          <div class="recent-activity-header">
+            <div class="recent-activity-title">Recent Diagnoses — Live Queue</div>
+            <span class="text-xs text-muted" style="font-family:var(--font-mono);">Pulls from audit trail · Auto-refresh</span>
+          </div>
+          <div class="recent-activity-list" id="recentActivityList">
+            <div class="text-xs text-muted" style="font-family:var(--font-mono);">Loading recent activity…</div>
           </div>
         </div>
       </div>
@@ -289,12 +292,20 @@
               <option value="Low">Low</option>
             </select>
           </div>
-          <div class="table-wrap">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-top:1px solid var(--border); padding-top:12px;">
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase;">View — Table / Grid</span>
+            <div class="view-toggle">
+              <button class="view-toggle-btn active" data-view="table">Table</button>
+              <button class="view-toggle-btn" data-view="grid">Grid</button>
+            </div>
+          </div>
+          <div class="table-wrap" id="caseTableWrap">
             <table class="data-table">
               <thead><tr><th>Case ID</th><th>Scenario Title</th><th>Domain</th><th>OSI Layer</th><th>Severity</th><th>Status</th><th></th></tr></thead>
               <tbody id="caseTableBody"></tbody>
             </table>
           </div>
+          <div class="case-grid" id="caseGrid" style="display:none;"></div>
         </div>
       </div>
 
