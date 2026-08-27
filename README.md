@@ -145,7 +145,3 @@ ObsidianTrace/
 ├── requirements.txt
 └── README.md
 ```
-
-## License
-
-No license file was present in the original NetSage-AI repository. This rebrand (ObsidianTrace) retains the original authorship where applicable and is provided as-is for educational use. If you fork, add a `LICENSE` (e.g., MIT) and preserve any attribution required by the original source at `https://github.com/abishek-vk/NetSage-AI`.
