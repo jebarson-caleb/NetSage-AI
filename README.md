@@ -102,11 +102,13 @@ python -m py_compile web/server.py engine/*.py cli.py
 **CLI**
 
 ```bash
-python cli.py --chat
-python cli.py --run-all
-python cli.py --case NET-001
+python cli.py --chat                         # interactive local-first assistant
+python cli.py --run-all --no-llm              # deterministic offline batch run
+python cli.py --case NET-001                  # human-readable diagnosis
+python cli.py --case NET-001 --json --no-llm  # automation-friendly diagnosis
+python cli.py --run-all --json --no-llm       # structured batch report
 python cli.py --case NET-001 --provider groq --model llama-3.3-70b-versatile --groq-key gsk_...
-python cli.py --stats
+python cli.py --stats --json
 ```
 
 ## Project Structure

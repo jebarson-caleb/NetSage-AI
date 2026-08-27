@@ -121,6 +121,12 @@ function setupNavigation() {
     }
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('active');
+    if (targetId === 'page-overview') {
+      requestAnimationFrame(() => {
+        renderAnalyticsCharts();
+        Object.values(state.charts).forEach(chart => chart?.resize());
+      });
+    }
     window.scrollTo({top:0, behavior:'smooth'});
   }
   allNav.forEach(item => {
@@ -183,6 +189,23 @@ function setupEventListeners() {
       if (!state.assistantDiagnosis) return;
       openReviewModalFromAssistant();
     });
+  }
+
+  // Preset gallery: arrow controls and mouse-wheel scrolling keep the scroll scoped to this section.
+  const presetScroller = document.getElementById('ptPresetsList');
+  document.querySelectorAll('[data-preset-scroll]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (!presetScroller) return;
+      const distance = Math.max(240, Math.round(presetScroller.clientWidth * 0.8));
+      presetScroller.scrollBy({ left: button.dataset.presetScroll === 'right' ? distance : -distance, behavior: 'smooth' });
+    });
+  });
+  if (presetScroller) {
+    presetScroller.addEventListener('wheel', event => {
+      if (presetScroller.scrollWidth <= presetScroller.clientWidth || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      presetScroller.scrollLeft += event.deltaY;
+    }, { passive: false });
   }
 
   // Command Template Inserter
@@ -282,12 +305,40 @@ function showToast(message, type) {
 
 function renderAllViews() {
   updateKpiBanner();
+  renderAnalyticsSignals();
   renderAnalyticsCharts();
   renderCaseTable();
   renderCaseGrid();
   renderReviewTable();
   renderResponsibleAiLog();
   renderRecentActivity();
+}
+
+function renderAnalyticsSignals() {
+  const stats = state.stats || {};
+  const setText = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  };
+  const total = Number(stats.total_cases ?? state.cases.length ?? 0);
+  const pending = Number(stats.pending ?? Math.max(0, total - Number(stats.reviewed_count ?? 0)));
+  const flagged = Number(stats.rule_flagged_cases ?? 0);
+  const highImpact = Number(stats.high_impact_cases ?? 0);
+  const topDomain = stats.top_domain || Object.entries(stats.domain_distribution || {}).sort((a, b) => b[1] - a[1])[0]?.[0] || 'No domain data';
+  const severity = Object.entries(stats.severity_distribution || {}).sort((a, b) => b[1] - a[1])[0];
+  const topLayer = Object.entries(stats.layer_distribution || {}).sort((a, b) => b[1] - a[1])[0];
+  const agreement = Number(stats.ai_human_agreement_rate_pct ?? 0);
+
+  setText('analytics-total-cases', total);
+  setText('analytics-pending', pending);
+  setText('analytics-rule-coverage', `${Number(stats.rule_coverage_pct ?? (total ? flagged / total * 100 : 0)).toFixed(1)}%`);
+  setText('analytics-high-impact', highImpact);
+  setText('analytics-top-domain', topDomain);
+  setText('analytics-observation-text', `${severity ? `${severity[1]} ${severity[0].toLowerCase()} cases need attention. ` : ''}${pending} remain in the review queue; prioritize evidence capture before applying any fix.`);
+  setText('layerChartInsight', topLayer ? `Largest concentration: ${topLayer[0]} (${topLayer[1]} cases)` : 'No layer data');
+  setText('verdictChartInsight', `${Number(stats.reviewed_count ?? 0)} reviewed · ${agreement.toFixed(1)}% accepted without edits`);
+  setText('domainChartInsight', `Leading domain: ${topDomain}`);
+  setText('severityChartInsight', highImpact ? `${highImpact} high-impact cases require controlled review` : 'No high-impact cases in the dataset');
 }
 
 function updateKpiBanner() {
@@ -297,7 +348,7 @@ function updateKpiBanner() {
   if (state.stats) {
     const agreeEl = document.getElementById('kpi-agreement-rate');
     const editEl = document.getElementById('kpi-human-edits');
-    const pct = `${state.stats.ai_human_agreement_rate_pct || 80.0}%`;
+    const pct = `${state.stats.ai_human_agreement_rate_pct ?? 0}%`;
     if (agreeEl) agreeEl.textContent = pct;
     if (heroAgree) heroAgree.textContent = pct;
     if (editEl) editEl.textContent = (state.stats.edited || 0) + (state.stats.rejected || 0);
@@ -318,7 +369,7 @@ function renderAnalyticsCharts() {
   // 1. Layer Chart
   const layerCtx = document.getElementById('layerChart')?.getContext('2d');
   if (layerCtx) {
-    const layerCounts = state.stats?.layer_distribution || {
+    const layerCounts = state.stats?.layer_distribution ?? {
       "Layer 1 (Physical)": 1, "Layer 2 (Data Link)": 8, "Layer 3 (Network)": 18,
       "Layer 4 (Transport)": 5, "Layer 7 (Application)": 3
     };
@@ -346,10 +397,10 @@ function renderAnalyticsCharts() {
   // 2. Verdict Chart — monochrome
   const verdictCtx = document.getElementById('verdictChart')?.getContext('2d');
   if (verdictCtx) {
-    const accepted = state.stats?.accepted || 10;
-    const edited = state.stats?.edited || 8;
-    const rejected = state.stats?.rejected || 2;
-    const pending = state.stats?.pending || 15;
+    const accepted = state.stats?.accepted ?? 0;
+    const edited = state.stats?.edited ?? 0;
+    const rejected = state.stats?.rejected ?? 0;
+    const pending = state.stats?.pending ?? 0;
     if (state.charts.verdict) state.charts.verdict.destroy();
     state.charts.verdict = new Chart(verdictCtx, {
       type: 'bar',
@@ -378,8 +429,8 @@ function renderAnalyticsCharts() {
   // 3. Domain Chart
   const domainCtx = document.getElementById('domainChart')?.getContext('2d');
   if (domainCtx) {
-    const domainCounts = state.stats?.domain_distribution || {};
-    const topDomains = Object.entries(domainCounts).slice(0, 6);
+    const domainCounts = state.stats?.domain_distribution ?? {};
+    const topDomains = Object.entries(domainCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
     if (state.charts.domain) state.charts.domain.destroy();
     state.charts.domain = new Chart(domainCtx, {
       type: 'bar',
@@ -408,7 +459,7 @@ function renderAnalyticsCharts() {
   // 4. Severity Chart
   const sevCtx = document.getElementById('severityChart')?.getContext('2d');
   if (sevCtx) {
-    const sevCounts = state.stats?.severity_distribution || {
+    const sevCounts = state.stats?.severity_distribution ?? {
       "Critical": 6, "High": 18, "Medium": 11, "Low": 0
     };
     if (state.charts.severity) state.charts.severity.destroy();
@@ -831,10 +882,16 @@ function renderPresets() {
   state.presets.forEach((preset, idx) => {
     const card = document.createElement('button');
     card.className = 'preset-card';
+    card.type = 'button';
+    card.setAttribute('aria-pressed', 'false');
     card.innerHTML = `<div class="preset-card-index">[${String(idx+1).padStart(2,'0')}]</div><div class="preset-card-title">${escapeHtml(preset.title)}</div><div class="preset-card-domain">${escapeHtml(preset.domain||'Packet Tracer')}</div>`;
     card.addEventListener('click', () => {
-      document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.preset-card').forEach(c => {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
       card.classList.add('active');
+      card.setAttribute('aria-pressed', 'true');
       loadPresetIntoAssistant(preset);
     });
     container.appendChild(card);
@@ -872,7 +929,10 @@ function clearAssistantFields() {
     providerBadge.className = 'badge badge-gray';
   }
 
-  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.preset-card, .preset-chip').forEach(c => {
+    c.classList.remove('active');
+    c.setAttribute('aria-pressed', 'false');
+  });
   state.assistantDiagnosis = null;
 
   if (outContainer) {

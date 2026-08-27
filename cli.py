@@ -8,14 +8,15 @@ import sys
 import os
 import json
 import argparse
+import contextlib
+import io
 from engine.ai_engine import DiagnosticEngine
-from engine.rule_checker import NetworkRuleChecker
 from engine.human_review import HumanReviewManager
-from engine.simulator import CiscoTerminalSimulator
 
-if hasattr(sys.stdout, "reconfigure"):
+stdout_reconfigure = getattr(sys.stdout, "reconfigure", None)
+if stdout_reconfigure:
     try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        stdout_reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
 
@@ -27,7 +28,7 @@ def print_banner():
  | |\  |  __/ |_ ___) | (_| | (_| |  __/ ___ \ | | 
  |_| \_|\___|\__|____/ \__,_|\__, |\___/_/   \_\___|
                              |___/                  
-   Cisco Packet Tracer Troubleshooting AI Assistant (Groq Powered)
+   Cisco Packet Tracer Troubleshooting AI Assistant (Local + Groq)
    Mandatory Safety Rule: Human-in-the-Loop Review Active
 """
     print(banner)
@@ -41,7 +42,7 @@ def load_dataset():
 def run_case_diagnosis(case_id, engine, cases_by_id, use_llm=True, model=None):
     if case_id not in cases_by_id:
         print(f"[ERROR] Case '{case_id}' not found in dataset. Available: {', '.join(list(cases_by_id.keys())[:10])}...")
-        return
+        return None
     case = cases_by_id[case_id]
     print(f"\n=======================================================")
     print(f"DIAGNOSING [{case['case_id']}] : {case['title']}")
@@ -78,9 +79,10 @@ def run_case_diagnosis(case_id, engine, cases_by_id, use_llm=True, model=None):
     print(diag.get("remediation_cli_script", ""))
     print(f"\nRisk Level : {diag.get('risk_level', 'Low')} | Rollback: {diag.get('rollback_procedure', '')}")
     print("[!] Mandatory Human Review: Test commands in Packet Tracer before applying to real hardware.")
+    return diag
 
 
-def run_interactive_chat(engine, model=None):
+def run_interactive_chat(engine, model=None, use_llm=True):
     print("\n=== INTERACTIVE CISCO PACKET TRACER TROUBLESHOOTING ASSISTANT ===")
     print("Type your Packet Tracer lab symptom or paste CLI show commands.")
     print("Type 'exit' or 'quit' to end session. Type 'sample' for a demo scenario.\n")
@@ -102,7 +104,8 @@ def run_interactive_chat(engine, model=None):
             res = engine.troubleshoot_chat(
                 user_message=user_input,
                 history=history,
-                model=model
+                model=model,
+                use_llm=use_llm
             )
             print("\n" + res["reply"])
             history.append({"role": "user", "content": user_input})
@@ -113,39 +116,69 @@ def run_interactive_chat(engine, model=None):
             break
 
 def run_all_cases(engine, cases, use_llm=False, model=None):
-    print("\n[BATCH EVALUATION] Running NetSage AI against all 35 Lab Cases...\n")
-    header = f"{'Case ID':<9} | {'Domain':<22} | {'OSI Layer':<12} | {'AI Confidence':<14} | {'Deterministic Pre-Check':<24} | {'Status'}"
+    print(f"\n[BATCH EVALUATION] Running NetSage AI against all {len(cases)} Lab Cases...\n")
+    header = f"{'Case ID':<9} | {'Domain':<22} | {'Severity':<9} | {'AI Confidence':<14} | {'Deterministic Pre-Check':<24} | {'Status'}"
     print(header)
     print("-" * len(header))
 
     rule_hits = 0
     total = len(cases)
+    results = []
+    confidence_total = 0.0
     for c in cases:
         diag = engine.diagnose_case(c, use_llm=use_llm, model=model)
-        rule_flag = "FLAGGED (" + diag["rule_checker_pre_scan"]["violations"][0]["rule_id"][:12] + ")" if diag["rule_checker_pre_scan"]["has_violations"] else "CLEAN"
-        if diag["rule_checker_pre_scan"]["has_violations"]:
+        has_violations = diag["rule_checker_pre_scan"]["has_violations"]
+        rule_flag = "FLAGGED (" + diag["rule_checker_pre_scan"]["violations"][0]["rule_id"][:12] + ")" if has_violations else "CLEAN"
+        if has_violations:
             rule_hits += 1
-        conf_str = f"{int(diag['confidence']*100)}%"
-        print(f"{c['case_id']:<9} | {c['domain'][:22]:<22} | {c['osi_layer'][:12]:<12} | {conf_str:<14} | {rule_flag:<24} | READY FOR REVIEW")
+        confidence = float(diag.get("confidence", 0.0))
+        confidence_total += confidence
+        results.append({
+            "case_id": c["case_id"],
+            "domain": c.get("domain", "General"),
+            "severity": c.get("severity", "Medium"),
+            "confidence": confidence,
+            "rule_flagged": has_violations,
+            "rule_id": diag["rule_checker_pre_scan"]["violations"][0]["rule_id"] if has_violations else None,
+            "status": "READY FOR REVIEW"
+        })
+        conf_str = f"{int(confidence*100)}%"
+        print(f"{c['case_id']:<9} | {c.get('domain', 'General')[:22]:<22} | {c.get('severity', 'Medium'):<9} | {conf_str:<14} | {rule_flag:<24} | READY FOR REVIEW")
 
+    rule_rate = (rule_hits / total) * 100 if total else 0.0
+    avg_confidence = (confidence_total / total) * 100 if total else 0.0
+    summary = {
+        "total": total,
+        "rule_hits": rule_hits,
+        "rule_hit_rate_pct": round(rule_rate, 1),
+        "average_confidence_pct": round(avg_confidence, 1),
+        "diagnostic_coverage_pct": 100.0 if total else 0.0
+    }
     print("-" * len(header))
     print(f"\nCompleted: {total}/{total} cases evaluated.")
-    print(f"Deterministic Rule Hit Rate : {(rule_hits/total)*100:.1f}% ({rule_hits}/{total})")
-    print(f"AI Diagnostic Coverage      : 100.0% ({total}/{total})")
+    print(f"Deterministic Rule Hit Rate : {rule_rate:.1f}% ({rule_hits}/{total})")
+    print(f"Average AI Confidence       : {avg_confidence:.1f}%")
+    print(f"AI Diagnostic Coverage      : {summary['diagnostic_coverage_pct']:.1f}% ({total}/{total})")
+    return {"results": results, "summary": summary}
 
 def main():
-    print_banner()
     parser = argparse.ArgumentParser(description="NetSage AI: Cisco Packet Tracer Troubleshooting Assistant")
-    parser.add_argument("--case", type=str, help="Diagnose a specific case (e.g. NET-001)")
-    parser.add_argument("--chat", action="store_true", help="Launch interactive Cisco Packet Tracer chat assistant in terminal")
-    parser.add_argument("--run-all", action="store_true", help="Run batch diagnosis over all 35 lab cases")
-    parser.add_argument("--stats", action="store_true", help="Show human review statistics and agreement metrics")
-    parser.add_argument("--provider", type=str, default="groq", help="LLM Provider: groq (default), local, gemini, openai")
-    parser.add_argument("--model", type=str, default="openai/gpt-oss-120b", help="Groq / LLM Model: openai/gpt-oss-120b, openai/gpt-oss-20b, qwen/qwen3.6-27b")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--case", type=str, help="Diagnose a specific case (e.g. NET-001)")
+    modes.add_argument("--chat", action="store_true", help="Launch interactive Cisco Packet Tracer chat assistant in terminal")
+    modes.add_argument("--run-all", action="store_true", help="Run batch diagnosis over every case in the dataset")
+    modes.add_argument("--stats", action="store_true", help="Show human review statistics and agreement metrics")
+    parser.add_argument("--provider", choices=["groq", "local", "gemini", "openai"], default="local", help="LLM provider (default: local/offline)")
+    parser.add_argument("--model", type=str, help="Cloud model name; defaults to the provider environment setting")
     parser.add_argument("--groq-key", type=str, help="Groq API Key (or set GROQ_API_KEY environment variable)")
+    parser.add_argument("--no-llm", action="store_true", help="Force deterministic + local reasoning, even when a cloud key is configured")
+    parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON instead of the human report")
 
-    
     args = parser.parse_args()
+    if args.json and args.chat:
+        parser.error("--json cannot be combined with --chat because chat is interactive")
+    if not args.json:
+        print_banner()
     
     cases = load_dataset()
     cases_by_id = {c["case_id"]: c for c in cases}
@@ -154,27 +187,46 @@ def main():
         provider=args.provider,
         model_name=args.model
     )
+    use_llm = not args.no_llm
     review_manager = HumanReviewManager()
 
     if args.chat:
-        run_interactive_chat(engine, model=args.model)
+        run_interactive_chat(engine, model=args.model, use_llm=use_llm)
     elif args.case:
-        run_case_diagnosis(args.case, engine, cases_by_id, use_llm=True, model=args.model)
-    elif args.run_all:
-        run_all_cases(engine, cases, use_llm=False, model=args.model)
+        if args.case not in cases_by_id:
+            message = {"error": f"Case '{args.case}' not found", "available_case_ids": list(cases_by_id)}
+            if args.json:
+                print(json.dumps(message, indent=2))
+            else:
+                print(f"[ERROR] {message['error']}. Available: {', '.join(message['available_case_ids'][:10])}...")
+            return 2
+        if args.json:
+            with contextlib.redirect_stdout(io.StringIO()):
+                diagnosis = run_case_diagnosis(args.case, engine, cases_by_id, use_llm=use_llm, model=args.model)
+            print(json.dumps(diagnosis, indent=2))
+        else:
+            run_case_diagnosis(args.case, engine, cases_by_id, use_llm=use_llm, model=args.model)
     elif args.stats:
         stats = review_manager.get_stats(len(cases))
-        print("\n--- HUMAN REVIEW & AI AGREEMENT METRICS ---")
-        for k, v in stats.items():
-            print(f"  {k.replace('_', ' ').title()}: {v}")
+        if args.json:
+            print(json.dumps(stats, indent=2))
+        else:
+            print("\n--- HUMAN REVIEW & AI AGREEMENT METRICS ---")
+            for k, v in stats.items():
+                print(f"  {k.replace('_', ' ').title()}: {v}")
     else:
-        # Default behavior: run all summary
-        run_all_cases(engine, cases, use_llm=False, model=args.model)
-        print("\nTip:")
-        print("  * Run 'python cli.py --chat' for interactive Cisco Packet Tracer lab troubleshooting.")
-        print("  * Run 'python cli.py --case NET-001' to diagnose a specific scenario.")
-        print("  * Launch the web dashboard at http://localhost:8000 via 'python web/server.py'.")
+        if args.json:
+            with contextlib.redirect_stdout(io.StringIO()):
+                batch = run_all_cases(engine, cases, use_llm=use_llm, model=args.model)
+            print(json.dumps(batch, indent=2))
+        else:
+            run_all_cases(engine, cases, use_llm=use_llm, model=args.model)
+            print("\nTip:")
+            print("  * Run 'python cli.py --chat' for interactive Cisco Packet Tracer lab troubleshooting.")
+            print("  * Run 'python cli.py --case NET-001 --json' for automation-friendly output.")
+            print("  * Use '--provider groq' only when GROQ_API_KEY is configured.")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
 

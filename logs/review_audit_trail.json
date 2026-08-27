@@ -3,7 +3,7 @@
     "case_id": "NET-001",
     "reviewer": "Test CCIE Engineer",
     "decision": "Accepted",
-    "timestamp": "2026-08-27 21:18:12",
+    "timestamp": "2026-08-27 22:02:54",
     "ai_root_cause": "PRIMARY / CONFIRMED: Router subinterfaces used for Router-on-a-Stick inter-VLAN routing require 802.1Q encapsulation to tag/untag frames for VLAN 20.",
     "ai_cli_fix": "interface g0/0/0.20\n encapsulation dot1Q 20",
     "ai_confidence": 1.0,
@@ -33,7 +33,7 @@
     "case_id": "NET-003",
     "reviewer": "Architect Reviewer",
     "decision": "Edited",
-    "timestamp": "2026-08-27 21:18:14",
+    "timestamp": "2026-08-27 22:02:55",
     "ai_root_cause": "PRIMARY / CONFIRMED: DHCP Discover broadcast messages do not cross router boundaries without an 'ip helper-address' configured on the client gateway.",
     "ai_cli_fix": "interface GigabitEthernet0/0.30\n ip helper-address 192.168.10.100",
     "ai_confidence": 1.0,
@@ -300,5 +300,20 @@
     "error_category": "Unsafe Command / Destructive Risk",
     "safety_warnings": [],
     "status": "rejected"
+  },
+  "PT-DIAG-6588": {
+    "case_id": "PT-DIAG-6588",
+    "reviewer": "Alex Rivera (Lead Network Engineer)",
+    "decision": "Accepted",
+    "timestamp": "2026-08-27 21:33:46",
+    "ai_root_cause": "PRIMARY (POSSIBLE): VLAN 20 is not configured on the switch access port Fa0/20 or not allowed on the trunk to R1, so frames from PC-2 never reach router subinterface GigabitEthernet0/0/0.20.",
+    "ai_cli_fix": "configure terminal\n! Ensure VLAN 20 exists on the switch\nvlan 20\n name VLAN20\n exit\n! Configure the access port for PC-2 (assumed Fa0/20)\ninterface FastEthernet0/20\n switchport mode access\n switchport access vlan 20\n exit\n! Add VLAN 20 to the trunk that connects to R1 (assumed GigabitEthernet0/1)\ninterface GigabitEthernet0/1\n switchport mode trunk\n switchport trunk allowed vlan add 20\n exit\nend",
+    "ai_confidence": 0.6,
+    "final_root_cause": "PRIMARY (POSSIBLE): VLAN 20 is not configured on the switch access port Fa0/20 or not allowed on the trunk to R1, so frames from PC-2 never reach router subinterface GigabitEthernet0/0/0.20.",
+    "final_cli_fix": "configure terminal\n! Ensure VLAN 20 exists on the switch\nvlan 20\n name VLAN20\n exit\n! Configure the access port for PC-2 (assumed Fa0/20)\ninterface FastEthernet0/20\n switchport mode access\n switchport access vlan 20\n exit\n! Add VLAN 20 to the trunk that connects to R1 (assumed GigabitEthernet0/1)\ninterface GigabitEthernet0/1\n switchport mode trunk\n switchport trunk allowed vlan add 20\n exit\nend",
+    "reviewer_notes": "its accurate",
+    "error_category": "Unsafe Command / Destructive Risk",
+    "safety_warnings": [],
+    "status": "accepted"
   }
 }

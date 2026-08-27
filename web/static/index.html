@@ -29,12 +29,12 @@
       <button class="nav-link" data-target="page-review">Review</button>
       <button class="nav-link" data-target="page-responsible">Responsible AI</button>
     </nav>
-    <div style="display:flex; align-items:center; gap:8px;">
+    <div class="top-nav-actions" style="display:flex; align-items:center; gap:8px;">
       <div class="engine-status" id="assistantEngineBadge">
         <span class="engine-status-dot"></span>
         <span id="assistantEngineStatusText">Local Engine</span>
       </div>
-      <a href="/api/export/csv" class="btn btn-secondary btn-sm" style="font-family:var(--font-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;">Export CSV</a>
+      <a href="/api/export/csv" class="btn btn-secondary btn-sm top-nav-export" style="font-family:var(--font-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;">Export CSV</a>
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -188,9 +188,13 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>Preset Gallery — 01–06 · Click to load into console</div>
-            <span class="text-xs text-muted" style="font-family:var(--font-mono); letter-spacing:0.06em; text-transform:uppercase;">Horizontal scroll →</span>
+            <span class="text-xs text-muted gallery-hint" style="font-family:var(--font-mono); letter-spacing:0.06em; text-transform:uppercase;">Drag, wheel, or use arrows →</span>
           </div>
-          <div class="preset-cards" id="ptPresetsList"></div>
+          <div class="preset-gallery" aria-label="Packet Tracer preset gallery">
+            <button class="preset-scroll-btn" type="button" data-preset-scroll="left" aria-label="Scroll presets left">←</button>
+            <div class="preset-cards" id="ptPresetsList" tabindex="0" role="region" aria-label="Six Packet Tracer presets"></div>
+            <button class="preset-scroll-btn" type="button" data-preset-scroll="right" aria-label="Scroll presets right">→</button>
+          </div>
         </div>
 
         <!-- Workbench -->
@@ -314,16 +318,24 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Overview & Analytics</h1>
-            <p class="page-subtitle">Distribution of fault domains, review verdicts, and severity — editorial grid</p>
+            <p class="page-subtitle">Turn diagnostic volume into action: what needs review, where faults cluster, and how much the rule engine catches.</p>
           </div>
         </div>
-        <div class="charts-grid">
-          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg></span>OSI Layer Fault Distribution</div></div><div class="chart-wrapper"><canvas id="layerChart"></canvas></div></div>
-          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="20 6 9 17 4 12"/></svg></span>Human Review Verdicts</div></div><div class="chart-wrapper"><canvas id="verdictChart"></canvas></div></div>
+        <div class="analytics-signal-grid" aria-label="Operational analytics summary">
+          <div class="analytics-signal-card"><div class="analytics-signal-label">Lab Coverage</div><div class="analytics-signal-value" id="analytics-total-cases">—</div><div class="analytics-signal-sub">structured cases loaded</div></div>
+          <div class="analytics-signal-card analytics-signal-priority"><div class="analytics-signal-label">Review Queue</div><div class="analytics-signal-value" id="analytics-pending">—</div><div class="analytics-signal-sub">awaiting human decision</div></div>
+          <div class="analytics-signal-card"><div class="analytics-signal-label">Rule Coverage</div><div class="analytics-signal-value" id="analytics-rule-coverage">—</div><div class="analytics-signal-sub">cases flagged before AI</div></div>
+          <div class="analytics-signal-card"><div class="analytics-signal-label">High Impact</div><div class="analytics-signal-value" id="analytics-high-impact">—</div><div class="analytics-signal-sub">critical + high severity</div></div>
         </div>
-        <div class="charts-grid">
-          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Fault Concept Domains</div></div><div class="chart-wrapper"><canvas id="domainChart"></canvas></div></div>
-          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.2 3.8L1.8 18a1.8 1.8 0 0 0 1.6 2.7h16.9a1.8 1.8 0 0 0 1.6-2.7L13.6 3.8a1.8 1.8 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Issue Severity Breakdown</div></div><div class="chart-wrapper"><canvas id="severityChart"></canvas></div></div>
+        <div class="analytics-observation card">
+          <div class="analytics-observation-mark">SIGNAL</div>
+          <div><strong id="analytics-top-domain">Loading fault concentration…</strong><span id="analytics-observation-text">Analytics will surface the dominant domain and the next operational action.</span></div>
+        </div>
+        <div class="charts-grid analytics-charts-grid">
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg></span>OSI Layer Fault Distribution</div></div><div class="chart-wrapper"><canvas id="layerChart"></canvas></div><div class="chart-insight" id="layerChartInsight">Layer concentration</div></div>
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="20 6 9 17 4 12"/></svg></span>Human Review Verdicts</div></div><div class="chart-wrapper"><canvas id="verdictChart"></canvas></div><div class="chart-insight" id="verdictChartInsight">Review throughput</div></div>
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Fault Concept Domains</div></div><div class="chart-wrapper"><canvas id="domainChart"></canvas></div><div class="chart-insight" id="domainChartInsight">Most frequent concepts</div></div>
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.2 3.8L1.8 18a1.8 1.8 0 0 0 1.6 2.7h16.9a1.8 1.8 0 0 0 1.6-2.7L13.6 3.8a1.8 1.8 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Issue Severity Breakdown</div></div><div class="chart-wrapper"><canvas id="severityChart"></canvas></div><div class="chart-insight" id="severityChartInsight">Impact profile</div></div>
         </div>
       </div>
 

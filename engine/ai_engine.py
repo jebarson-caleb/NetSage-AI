@@ -16,7 +16,6 @@ from engine.rule_checker import NetworkRuleChecker
 GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODELS_URL = "https://api.groq.com/openai/v1/models"
-GROQ_FALLBACK_KEY = "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"
 
 def _load_env_file():
     """Lightweight zero-dependency .env reader."""
@@ -45,7 +44,7 @@ class DiagnosticEngine:
         env_groq = os.environ.get("GROQ_API_KEY", "")
         env_gemini = os.environ.get("GEMINI_API_KEY", "")
         env_openai = os.environ.get("OPENAI_API_KEY", "")
-        env_netsage = os.environ.get("NETSAGE_API_KEY", "") or os.environ.get("NETSAGE_API_KEY", "") or os.environ.get("NETSAGE_API_KEY", "")
+        env_netsage = os.environ.get("NETSAGE_API_KEY", "")
 
         if api_key:
             self.api_key = api_key
@@ -56,7 +55,7 @@ class DiagnosticEngine:
         elif self.provider == "openai" and env_openai:
             self.api_key = env_openai
         else:
-            self.api_key = env_groq or GROQ_FALLBACK_KEY or env_netsage or env_gemini or env_openai or ""
+            self.api_key = env_netsage or env_groq or env_gemini or env_openai or ""
 
         # Default model selection
         if model_name:
@@ -90,7 +89,7 @@ class DiagnosticEngine:
         used_provider = "local"
         error_msg = None
 
-        if (use_llm or active_provider == "groq") and active_api_key and active_provider != "local":
+        if use_llm and active_api_key and active_provider != "local":
             try:
                 if active_provider == "groq":
                     ai_result = self._call_groq_llm(case_data, rule_findings, active_api_key, active_model)
@@ -271,7 +270,7 @@ Return strictly a JSON object matching this schema:
   "requires_human_approval": true
 }}"""
 
-    def troubleshoot_chat(self, user_message: str, history: Optional[List[Dict[str, str]]] = None, pasted_cli: Optional[str] = None, topology: Optional[str] = None, api_key: Optional[str] = None, model: Optional[str] = None) -> Dict[str, Any]:
+    def troubleshoot_chat(self, user_message: str, history: Optional[List[Dict[str, str]]] = None, pasted_cli: Optional[str] = None, topology: Optional[str] = None, api_key: Optional[str] = None, model: Optional[str] = None, use_llm: bool = True) -> Dict[str, Any]:
         """
         Interactive conversational Cisco Packet Tracer assistant.
         Takes free-form student queries, pasted show outputs, or topologies and returns
@@ -328,7 +327,7 @@ Return strictly a JSON object matching this schema:
         messages.append({"role": "user", "content": "\n".join(user_prompt_parts)})
 
         # Call Groq if key is available
-        if active_key:
+        if use_llm and active_key:
             try:
                 headers = {
                     "Content-Type": "application/json",

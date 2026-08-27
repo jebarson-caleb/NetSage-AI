@@ -171,6 +171,11 @@ class NetSageHandler(SimpleHTTPRequestHandler):
             stats["layer_distribution"] = layer_counts
             stats["severity_distribution"] = severity_counts
             stats["domain_distribution"] = domain_counts
+            stats["high_impact_cases"] = severity_counts.get("Critical", 0) + severity_counts.get("High", 0)
+            stats["top_domain"] = max(domain_counts.items(), key=lambda item: item[1])[0] if domain_counts else "No domain data"
+            flagged_cases = sum(1 for case in cases if self.rule_checker.scan(case).get("has_violations"))
+            stats["rule_flagged_cases"] = flagged_cases
+            stats["rule_coverage_pct"] = round((flagged_cases / len(cases)) * 100, 1) if cases else 0.0
             self._send_json(stats)
             return
 
