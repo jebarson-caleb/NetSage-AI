@@ -13,7 +13,7 @@ import urllib.parse
 import urllib.error
 from engine.rule_checker import NetworkRuleChecker
 
-GROQ_DEFAULT_MODEL = "llama-3.3-70b-versatile"
+GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODELS_URL = "https://api.groq.com/openai/v1/models"
 GROQ_FALLBACK_KEY = "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"

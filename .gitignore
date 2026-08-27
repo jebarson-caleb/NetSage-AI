@@ -16,3 +16,12 @@ ENV/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Node
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Verification artifacts
+verify_project2.py
+ui_test.js

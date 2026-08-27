@@ -15,9 +15,9 @@ let state = {
   charts: {},
   settings: {
     provider: localStorage.getItem('obsidiantrace_provider') || localStorage.getItem('netsage_provider') || 'groq',
-    groqModel: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'].includes(localStorage.getItem('obsidiantrace_groq_model') || localStorage.getItem('netsage_groq_model'))
+    groqModel: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'].includes(localStorage.getItem('obsidiantrace_groq_model') || localStorage.getItem('netsage_groq_model'))
       ? (localStorage.getItem('obsidiantrace_groq_model') || localStorage.getItem('netsage_groq_model'))
-      : 'llama-3.3-70b-versatile',
+      : 'openai/gpt-oss-120b',
     apiKey: localStorage.getItem('obsidiantrace_groq_api_key') || localStorage.getItem('netsage_groq_api_key') || '',
     reviewerName: localStorage.getItem('obsidiantrace_reviewer') || localStorage.getItem('netsage_reviewer') || 'Alex Rivera (Lead Network Engineer)'
   }
@@ -298,9 +298,9 @@ function updateKpiBanner() {
 
 function renderAnalyticsCharts() {
   const chartColors = {
-    bg: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444'],
-    text: '#6b7280',
-    grid: '#e5e7eb'
+    bg: ['#0a0a0a', '#27272a', '#52525b', '#71717a', '#a1a1aa', '#d4d4d8'],
+    text: '#52525b',
+    grid: '#e4e4e7'
   };
 
   // 1. Layer Chart
@@ -331,13 +331,13 @@ function renderAnalyticsCharts() {
     });
   }
 
-  // 2. Verdict Chart
+  // 2. Verdict Chart — monochrome
   const verdictCtx = document.getElementById('verdictChart')?.getContext('2d');
   if (verdictCtx) {
-    const accepted = state.stats?.accepted || 28;
-    const edited = state.stats?.edited || 6;
-    const rejected = state.stats?.rejected || 1;
-    const pending = state.stats?.pending || 0;
+    const accepted = state.stats?.accepted || 10;
+    const edited = state.stats?.edited || 8;
+    const rejected = state.stats?.rejected || 2;
+    const pending = state.stats?.pending || 15;
     if (state.charts.verdict) state.charts.verdict.destroy();
     state.charts.verdict = new Chart(verdictCtx, {
       type: 'bar',
@@ -346,8 +346,10 @@ function renderAnalyticsCharts() {
         datasets: [{
           label: 'Cases',
           data: [accepted, edited, rejected, pending],
-          backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#9ca3af'],
-          borderRadius: 4
+          backgroundColor: ['#0a0a0a', '#52525b', '#a1a1aa', '#e4e4e7'],
+          borderColor: '#0a0a0a',
+          borderWidth: 1,
+          borderRadius: 0
         }]
       },
       options: {
@@ -374,8 +376,10 @@ function renderAnalyticsCharts() {
         datasets: [{
           label: 'Cases',
           data: topDomains.map(d => d[1]),
-          backgroundColor: '#3b82f6',
-          borderRadius: 4
+          backgroundColor: '#0a0a0a',
+          borderColor: '#0a0a0a',
+          borderWidth: 1,
+          borderRadius: 0
         }]
       },
       options: {
@@ -402,7 +406,7 @@ function renderAnalyticsCharts() {
         labels: Object.keys(sevCounts),
         datasets: [{
           data: Object.values(sevCounts),
-          backgroundColor: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981'],
+          backgroundColor: ['#0a0a0a', '#52525b', '#71717a', '#a1a1aa'],
           borderColor: '#ffffff',
           borderWidth: 2
         }]
@@ -1078,7 +1082,16 @@ function renderAssistantDiagnosis(diag) {
 }
 
 function copyCiscoFixToClipboard(btn, text) {
-  navigator.clipboard.writeText(text).then(() => {
+  const doCopy = (t) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(t);
+    } else {
+      const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); return Promise.resolve(); } catch(e){ return Promise.reject(e); } finally { ta.remove(); }
+    }
+  };
+  doCopy(text).then(() => {
     btn.classList.add('copied');
     const originalHTML = btn.innerHTML;
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied';
@@ -1086,6 +1099,7 @@ function copyCiscoFixToClipboard(btn, text) {
       btn.classList.remove('copied');
       btn.innerHTML = originalHTML;
     }, 2000);
+    showToast('Copied to clipboard');
   }).catch(() => {
     showToast('Failed to copy to clipboard', 'error');
   });
