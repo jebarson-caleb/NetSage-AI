@@ -1,0 +1,86 @@
+[
+  {
+    "case_id": "FEWSHOT-01",
+    "domain": "VLAN / Subinterfaces",
+    "symptom": "PC in VLAN 10 cannot ping Server in VLAN 20. Gateway router subinterfaces are configured.",
+    "show_outputs": {
+      "show running-config interface g0/0/0.20": "interface GigabitEthernet0/0/0.20\n ip address 192.168.20.1 255.255.255.0\n!",
+      "show running-config interface g0/0/0.10": "interface GigabitEthernet0/0/0.10\n encapsulation dot1Q 10\n ip address 192.168.10.1 255.255.255.0\n!"
+    },
+    "diagnosis": {
+      "fault_summary": "Missing 802.1Q encapsulation on router subinterface G0/0/0.20",
+      "root_cause": "Subinterface GigabitEthernet0/0/0.20 has an IP address assigned but lacks 'encapsulation dot1Q 20'. Without encapsulation, the router cannot tag or process incoming 802.1Q tagged frames from VLAN 20.",
+      "osi_layer": "Layer 3 (Network)",
+      "concept_tag": "Inter-VLAN Routing / 802.1Q Subinterfaces",
+      "confidence": 0.98,
+      "evidence_citations": [
+        "G0/0/0.20 running-config shows 'ip address 192.168.20.1 255.255.255.0' without an encapsulation dot1Q statement.",
+        "G0/0/0.10 correctly possesses 'encapsulation dot1Q 10'."
+      ],
+      "next_recommended_commands": [
+        "show running-config interface GigabitEthernet0/0/0.20",
+        "show interfaces trunk"
+      ],
+      "remediation_cli_script": "interface GigabitEthernet0/0/0.20\n encapsulation dot1Q 20\n ip address 192.168.20.1 255.255.255.0\n no shutdown",
+      "risk_level": "Low",
+      "rollback_procedure": "default interface GigabitEthernet0/0/0.20",
+      "requires_human_approval": true
+    }
+  },
+  {
+    "case_id": "FEWSHOT-02",
+    "domain": "ACL / Security",
+    "symptom": "LAN hosts can ping 8.8.8.8 but domain name lookups (google.com) fail.",
+    "show_outputs": {
+      "show access-lists 101": "Extended IP access list 101\n 10 permit tcp 192.168.1.0 0.0.0.255 any eq www\n 20 permit tcp 192.168.1.0 0.0.0.255 any eq 443\n 30 deny ip any any (120 matches)"
+    },
+    "diagnosis": {
+      "fault_summary": "Inbound Extended ACL 101 is dropping DNS queries due to missing UDP/TCP port 53 permit rule",
+      "root_cause": "DNS queries use UDP port 53. ACL 101 permits only HTTP (80) and HTTPS (443); all other traffic hits the explicit 'deny ip any any' at line 30.",
+      "osi_layer": "Layer 4 (Transport)",
+      "concept_tag": "Extended ACL / DNS Port 53",
+      "confidence": 0.96,
+      "evidence_citations": [
+        "ACL 101 permits only eq www and eq 443; no permit statement for UDP port 53 exists.",
+        "Line 30 'deny ip any any' has 120 matching dropped packets."
+      ],
+      "next_recommended_commands": [
+        "show access-lists 101",
+        "show ip interface GigabitEthernet0/0"
+      ],
+      "remediation_cli_script": "ip access-list extended 101\n 25 permit udp 192.168.1.0 0.0.0.255 any eq domain\n 26 permit tcp 192.168.1.0 0.0.0.255 any eq domain",
+      "risk_level": "Low",
+      "rollback_procedure": "ip access-list extended 101\n no 25\n no 26",
+      "requires_human_approval": true
+    }
+  },
+  {
+    "case_id": "FEWSHOT-03",
+    "domain": "OSPF Routing",
+    "symptom": "OSPF neighbor state stuck in EXSTART/EXCHANGE between R1 and R2.",
+    "show_outputs": {
+      "show ip ospf neighbor": "Neighbor ID 2.2.2.2 Pri 1 State EXSTART/ - Dead Time 00:00:35 Address 10.0.0.2 GigabitEthernet0/0",
+      "show interfaces GigabitEthernet0/0 (R1)": "MTU 1500 bytes",
+      "show interfaces GigabitEthernet0/0 (R2)": "MTU 1400 bytes"
+    },
+    "diagnosis": {
+      "fault_summary": "OSPF adjacency stuck in EXSTART due to interface MTU size mismatch",
+      "root_cause": "R1 has an MTU of 1500 bytes while R2 has an MTU of 1400 bytes. During the Database Description (DBD) packet exchange, R2 drops R1's oversized DBD packets, preventing transition to FULL.",
+      "osi_layer": "Layer 3 (Network)",
+      "concept_tag": "OSPF MTU Mismatch & DBD Exchange",
+      "confidence": 0.97,
+      "evidence_citations": [
+        "Neighbor state is stuck at 'EXSTART/ -'.",
+        "R1 MTU is 1500 bytes while R2 MTU is 1400 bytes on GigabitEthernet0/0."
+      ],
+      "next_recommended_commands": [
+        "show interfaces GigabitEthernet0/0 | include MTU",
+        "show ip ospf interface GigabitEthernet0/0"
+      ],
+      "remediation_cli_script": "interface GigabitEthernet0/0\n ip mtu 1500",
+      "risk_level": "Low",
+      "rollback_procedure": "interface GigabitEthernet0/0\n ip mtu 1400",
+      "requires_human_approval": true
+    }
+  }
+]

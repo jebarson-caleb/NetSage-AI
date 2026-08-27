@@ -1,0 +1,8 @@
+﻿# ObsidianTrace: Dependencies
+# Core platform runs with zero external dependencies using Python 3.8+ Standard Library!
+# Optional packages for development and extended capabilities:
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+requests>=2.31.0
+httpx>=0.24.0

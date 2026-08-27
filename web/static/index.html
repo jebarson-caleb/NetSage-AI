@@ -1,0 +1,421 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ObsidianTrace | Cisco Packet Tracer Intelligence</title>
+  <meta name="description" content="ObsidianTrace — AI-assisted Cisco Packet Tracer troubleshooting with 30 deterministic rules, Groq-powered reasoning, and mandatory human-in-the-loop review.">
+  <meta property="og:title" content="ObsidianTrace">
+  <meta property="og:description" content="Editorial network intelligence for Cisco labs. Evidence-first diagnostics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Editorial Top Navigation -->
+<header class="editorial-nav">
+  <div class="editorial-nav-inner">
+    <a href="#" class="wordmark" onclick="navigateToPage(''page-assistant''); return false;">
+      <span class="wordmark-mark">OBSIDIAN<span>TRACE</span></span>
+      <span class="wordmark-sub">CISCO LAB<br>INTELLIGENCE</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <button class="nav-link active" data-target="page-assistant">Workbench</button>
+      <button class="nav-link" data-target="page-explorer">Cases <span class="nav-count" id="navCaseCount">35</span></button>
+      <button class="nav-link" data-target="page-overview">Analytics</button>
+      <button class="nav-link" data-target="page-review">Review</button>
+      <button class="nav-link" data-target="page-responsible">Responsible AI</button>
+    </nav>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="engine-status" id="assistantEngineBadge">
+        <span class="engine-status-dot"></span>
+        <span id="assistantEngineStatusText">Local Engine</span>
+      </div>
+      <a href="/api/export/csv" class="btn btn-secondary btn-sm" style="font-family:var(--font-mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;">Export CSV</a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="app-shell">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">◉</div>
+      <span class="sidebar-brand-text">ObsidianTrace</span>
+      <span class="sidebar-brand-badge">v2.2</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Diagnostics — 01</div>
+      <button class="sidebar-item active" data-target="page-assistant">
+        <span class="sidebar-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10z"/><path d="M12 6v6l4 2"/></svg></span>
+        <span class="sidebar-item-label">Workbench</span>
+      </button>
+      <button class="sidebar-item" data-target="page-explorer">
+        <span class="sidebar-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></svg></span>
+        <span class="sidebar-item-label">Case Explorer</span>
+        <span class="sidebar-item-count" id="sidebarCaseCount">35</span>
+      </button>
+      <div class="sidebar-section-label">Analytics — 02</div>
+      <button class="sidebar-item" data-target="page-overview">
+        <span class="sidebar-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+        <span class="sidebar-item-label">Overview & Analytics</span>
+      </button>
+      <div class="sidebar-section-label">Governance — 03</div>
+      <button class="sidebar-item" data-target="page-review">
+        <span class="sidebar-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        <span class="sidebar-item-label">Human Review</span>
+      </button>
+      <button class="sidebar-item" data-target="page-responsible">
+        <span class="sidebar-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+        <span class="sidebar-item-label">Responsible AI Log</span>
+        <span class="sidebar-item-count">7</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-safety-status">
+        <div class="sidebar-safety-dot"></div>
+        <span>Human Review — Mandatory</span>
+      </div>
+      <div style="margin-top:10px; font-family:var(--font-mono); font-size:10px; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase;">Evidence-first · No autonomous deploy</div>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <header class="top-header">
+      <div class="header-left">
+        <div class="header-breadcrumb" id="headerBreadcrumb"><strong>Workbench</strong> — Cisco Packet Tracer troubleshooting</div>
+      </div>
+      <div class="header-right">
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase;">Latency · Packets · Host · Port · Status · Protocol · Risk · Uptime</span>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- ==================== PAGE: TROUBLESHOOTING / WORKBENCH ==================== -->
+      <div id="page-assistant" class="page active">
+
+        <!-- Hero -->
+        <section class="hero">
+          <div class="hero-left">
+            <div class="hero-kicker">Editorial × Cybersecurity × AI — v2.2</div>
+            <h1 class="hero-title">OBSIDIAN<br>TRACE<span>Cisco Packet Tracer intelligence.<br>Evidence-first diagnostics — deterministic rules × Groq reasoning × human sign-off.</span></h1>
+            <p class="hero-desc">Built for CCNA/CCNP labs and instructors. Paste <em>show</em> outputs, get verbatim-cited root cause, copy-pasteable IOS fixes, and a mandatory review workflow before any deploy.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="document.getElementById(''assistantSymptom'').focus(); window.scrollTo({top:600, behavior:''smooth''});">Enter Workbench →</button>
+              <button class="btn btn-secondary" onclick="navigateToPage(''page-explorer'')">Explore 35 Cases</button>
+            </div>
+          </div>
+          <div class="hero-meta-right">
+            <div class="hero-stat-grid">
+              <div class="hero-stat"><div class="hero-stat-label">Lab Cases</div><div class="hero-stat-value" id="heroCases">35</div><div class="hero-stat-sub">Packet Tracer scenarios</div></div>
+              <div class="hero-stat"><div class="hero-stat-label">Deterministic Rules</div><div class="hero-stat-value">30</div><div class="hero-stat-sub">Static sanity checks</div></div>
+              <div class="hero-stat"><div class="hero-stat-label">Agreement Rate</div><div class="hero-stat-value" id="heroAgree">80%</div><div class="hero-stat-sub">Accepted / Verified</div></div>
+              <div class="hero-stat"><div class="hero-stat-label">Interventions</div><div class="hero-stat-value">7</div><div class="hero-stat-sub">Responsible AI logged</div></div>
+            </div>
+            <div class="hero-data-strip">
+              <span class="hero-data-pill">Latency · 12ms</span>
+              <span class="hero-data-pill">Packets · 14k</span>
+              <span class="hero-data-pill">Host · G0/0/0.20</span>
+              <span class="hero-data-pill">Port · 443</span>
+              <span class="hero-data-pill">Status · Pending Review</span>
+              <span class="hero-data-pill">Protocol · OSPF</span>
+              <span class="hero-data-pill">Risk · Low</span>
+              <span class="hero-data-pill">Uptime · 99.9%</span>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); line-height:1.5; border-top:1px solid var(--border); padding-top:12px;">
+              No neon. No matrix. Just grid, type, and evidence. Every AI fix requires explicit human approval — <strong style="color:var(--text-primary);">reload</strong> and <strong style="color:var(--text-primary);">erase startup-config</strong> are auto-intercepted.
+            </div>
+          </div>
+        </section>
+
+        <!-- Capabilities -->
+        <section class="capabilities">
+          <div class="cap-header">
+            <h2>Product Capabilities — 04 Modules</h2>
+            <p>Only features that exist in this repo</p>
+          </div>
+          <div class="cap-grid">
+            <div class="cap-item">
+              <div class="cap-index">[01]</div>
+              <div class="cap-title">Deterministic Rule Engine</div>
+              <div class="cap-desc">30 static checks for duplicate IPs, wrong masks, missing encapsulation, dangerous commands — 100% precision pre-scan.</div>
+            </div>
+            <div class="cap-item">
+              <div class="cap-index">[02]</div>
+              <div class="cap-title">Groq AI Reasoning</div>
+              <div class="cap-desc">llama-3.3-70b / 8b ultra-low latency inference with strict JSON schema, verbatim CLI citations, and fallback to local CCIE engine.</div>
+            </div>
+            <div class="cap-item">
+              <div class="cap-index">[03]</div>
+              <div class="cap-title">Human Review Workflow</div>
+              <div class="cap-desc">Accept / Edit / Reject state machine with audit trail, error taxonomy, and guardrails against destructive commands.</div>
+            </div>
+            <div class="cap-item">
+              <div class="cap-index">[04]</div>
+              <div class="cap-title">Live Lab Workbench</div>
+              <div class="cap-desc">Interactive presets, topology context, show-command quick-insert, and copy-paste IOS remediation with rollback.</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="data-bar"><div class="data-bar-inner"><div class="data-bar-item"><span>PACKET</span> 35 CASES</div><div class="data-bar-item"><span>HOST</span> R1 • R2 • CATALYST 2960</div><div class="data-bar-item"><span>PORT</span> G0/0/0.10 / 20 / 30</div><div class="data-bar-item"><span>STATUS</span> PENDING_REVIEW</div><div class="data-bar-item"><span>PROTOCOL</span> OSPF • VLAN • ACL • NAT</div><div class="data-bar-item"><span>RISK</span> LOW / MEDIUM / HIGH</div><div class="data-bar-item"><span>UPTIME</span> LAB_ISOLATED</div></div></div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid" style="margin-top:1px;">
+          <div class="kpi-card">
+            <div class="kpi-card-top"><span class="kpi-label">Lab Cases</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div>
+            <div class="kpi-value" id="kpi-total-cases">35</div>
+            <div class="kpi-sub">Cisco Packet Tracer Scenarios</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-top"><span class="kpi-label">AI-Human Agreement</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+            <div class="kpi-value" id="kpi-agreement-rate">80.0%</div>
+            <div class="kpi-sub">Accepted / Verified Diagnoses</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-top"><span class="kpi-label">Human Interventions</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+            <div class="kpi-value" id="kpi-human-edits">7</div>
+            <div class="kpi-sub">Responsible AI Logged Cases</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card-top"><span class="kpi-label">Deterministic Rules</span><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div></div>
+            <div class="kpi-value" id="kpi-rules-count">30</div>
+            <div class="kpi-sub">Static Config Sanity Checks</div>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>Quick Presets — Click to load</div>
+            <span class="text-xs text-muted" style="font-family:var(--font-mono); letter-spacing:0.06em; text-transform:uppercase;">6 lab scenarios</span>
+          </div>
+          <div class="presets-bar" id="ptPresetsList"></div>
+        </div>
+
+        <!-- Workbench -->
+        <div class="workbench-two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>Problem Input</div>
+              <button id="btnClearAssistant" class="btn btn-ghost btn-sm">Clear</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Observed Symptom / Error</label>
+              <textarea id="assistantSymptom" rows="2" class="form-textarea" placeholder="e.g. PC-2 in VLAN 20 cannot ping default gateway 192.168.20.1 or reach VLAN 10 hosts..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Network Topology Context <span class="text-muted" style="text-transform:none; letter-spacing:0;">(optional)</span></label>
+              <input type="text" id="assistantTopology" class="form-input" placeholder="e.g. Router R1 subinterfaces connected to Catalyst 2960 switch trunk G0/1.">
+            </div>
+            <div class="form-group">
+              <div class="flex justify-between items-center mb-2">
+                <label class="form-label" style="margin-bottom:0;">Cisco IOS Show Outputs / Running-Config</label>
+                <span class="text-xs text-muted" style="font-family:var(--font-mono);">Quick-insert:</span>
+              </div>
+              <div class="cmd-template-bar">
+                <button class="cmd-template-btn" data-cmd="show ip interface brief">show ip int br</button>
+                <button class="cmd-template-btn" data-cmd="show running-config">show run</button>
+                <button class="cmd-template-btn" data-cmd="show ip route">show ip route</button>
+                <button class="cmd-template-btn" data-cmd="show interfaces trunk">show int trunk</button>
+                <button class="cmd-template-btn" data-cmd="show vlan brief">show vlan brief</button>
+                <button class="cmd-template-btn" data-cmd="show ip dhcp binding">show ip dhcp</button>
+                <button class="cmd-template-btn" data-cmd="show access-lists">show access-lists</button>
+                <button class="cmd-template-btn" data-cmd="show ip nat translations">show ip nat</button>
+              </div>
+              <textarea id="assistantPastedCli" class="cli-editor" rows="8" placeholder="Router# show running-config interface GigabitEthernet0/0.20&#10;interface GigabitEthernet0/0.20&#10; ip address 192.168.20.1 255.255.255.0&#10;!"></textarea>
+            </div>
+            <button id="btnRunAssistantDiagnosis" class="btn btn-primary btn-lg w-full">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Analyze Network Issue
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>AI Diagnosis & Cisco Fix</div>
+              <span id="assistantProviderBadge" class="badge badge-gray">Ready</span>
+            </div>
+            <div id="assistantRuleBanner" style="display:none;"></div>
+            <div id="assistantOutputContainer" class="output-container">
+              <div class="empty-state">
+                <div class="empty-state-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <h4>Network Troubleshooter Ready</h4>
+                <p>Select a preset or enter symptoms + show commands to get evidence-based root cause and copy-pasteable IOS fixes.</p>
+              </div>
+            </div>
+            <div id="assistantActionFooter" class="action-bar" style="display:none;">
+              <button id="btnAssistantToReview" class="btn btn-warning btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Submit to Human Review
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PAGE: CASE EXPLORER ==================== -->
+      <div id="page-explorer" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Case Explorer — 35 Scenarios</h1>
+            <p class="page-subtitle">Browse Cisco Packet Tracer troubleshooting cases by ID, concept, and OSI layer</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="filter-row">
+            <input type="text" id="caseSearchInput" class="form-input" placeholder="Search by Case ID, symptom, concept, or keyword...">
+            <select id="layerFilter" class="form-select">
+              <option value="">All OSI Layers</option>
+              <option value="Layer 1">Layer 1 — Physical</option>
+              <option value="Layer 2">Layer 2 — Data Link</option>
+              <option value="Layer 3">Layer 3 — Network</option>
+              <option value="Layer 4">Layer 4 — Transport</option>
+              <option value="Layer 7">Layer 7 — Application</option>
+            </select>
+            <select id="severityFilter" class="form-select">
+              <option value="">All Severities</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Case ID</th><th>Scenario Title</th><th>Domain</th><th>OSI Layer</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+              <tbody id="caseTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PAGE: OVERVIEW & ANALYTICS ==================== -->
+      <div id="page-overview" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Overview & Analytics</h1>
+            <p class="page-subtitle">Distribution of fault domains, review verdicts, and severity — editorial grid</p>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg></span>OSI Layer Fault Distribution</div></div><div class="chart-wrapper"><canvas id="layerChart"></canvas></div></div>
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="20 6 9 17 4 12"/></svg></span>Human Review Verdicts</div></div><div class="chart-wrapper"><canvas id="verdictChart"></canvas></div></div>
+        </div>
+        <div class="charts-grid">
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Fault Concept Domains</div></div><div class="chart-wrapper"><canvas id="domainChart"></canvas></div></div>
+          <div class="card"><div class="card-header"><div class="card-title"><span class="card-title-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.2 3.8L1.8 18a1.8 1.8 0 0 0 1.6 2.7h16.9a1.8 1.8 0 0 0 1.6-2.7L13.6 3.8a1.8 1.8 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Issue Severity Breakdown</div></div><div class="chart-wrapper"><canvas id="severityChart"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- ==================== PAGE: HUMAN REVIEW ==================== -->
+      <div id="page-review" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Human Review Workbench</h1>
+            <p class="page-subtitle">Every AI diagnosis requires explicit human sign-off before deployment — audit trail below</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Case ID</th><th>Reviewer</th><th>Verdict</th><th>Timestamp</th><th>Error Taxonomy</th><th>Notes</th></tr></thead>
+              <tbody id="reviewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PAGE: RESPONSIBLE AI ==================== -->
+      <div id="page-responsible" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Responsible AI Log</h1>
+            <p class="page-subtitle">7 cases where AI advice was caught and corrected by expert engineers</p>
+          </div>
+          <span class="badge badge-severity-critical">7 Incidents Documented</span>
+        </div>
+        <div class="card">
+          <div class="card-description">Analyzes failures such as destructive reloads, inverted wildcard masks, IPAM bypasses, and stripping security ACLs — and documents human corrections.</div>
+        </div>
+        <div id="responsibleAiCards"></div>
+      </div>
+
+    </div>
+
+    <!-- Editorial Footer -->
+    <footer class="editorial-footer">
+      <div class="footer-top">
+        <div>
+          <div class="footer-wordmark">OBSIDIAN<br>TRACE<span>Cisco Lab Intelligence — 2026</span></div>
+          <p style="margin-top:12px; font-size:13px; color:#a1a1aa; line-height:1.6; max-width:420px;">Evidence-first network troubleshooting. No autonomous execution. Every remediation is gated by human approval. Built for Packet Tracer, CCNA/CCNP, and lab instructors.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Navigate</div>
+          <a class="footer-link" href="#" onclick="navigateToPage(''page-assistant''); return false;">Workbench</a>
+          <a class="footer-link" href="#" onclick="navigateToPage(''page-explorer''); return false;">Case Explorer — 35 cases</a>
+          <a class="footer-link" href="#" onclick="navigateToPage(''page-overview''); return false;">Overview & Analytics</a>
+          <a class="footer-link" href="#" onclick="navigateToPage(''page-review''); return false;">Human Review Workbench</a>
+          <a class="footer-link" href="#" onclick="navigateToPage(''page-responsible''); return false;">Responsible AI Log</a>
+        </div>
+        <div>
+          <div class="footer-col-title">System</div>
+          <div class="footer-link">Version 2.2 — Groq Llama 3.3</div>
+          <div class="footer-link">30 deterministic rules</div>
+          <div class="footer-link">Deterministic pre-scan + LLM reasoning</div>
+          <a class="footer-link" href="https://github.com/jebarson-caleb/ObsidianTrace" target="_blank" rel="noreferrer">GitHub — ObsidianTrace</a>
+          <a class="footer-link" href="/api/health" target="_blank">API Health — /api/health</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 ObsidianTrace — Editorial Network Intelligence. No Art reinterpreted. Not affiliated with Cisco.</span>
+        <span style="display:flex; gap:14px;"><span>LATENCY</span><span>PACKETS</span><span>HOST</span><span>PORT</span><span>STATUS</span><span>PROTOCOL</span></span>
+      </div>
+      <div class="footer-huge">OBSIDIAN TRACE</div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- Modal -->
+<div id="reviewModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 class="modal-title">Human Review & Approval</h2>
+      <button id="btnCloseReviewModal" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Case ID</label><div id="modalCaseId" style="font-size:14px; font-weight:700;">--</div></div>
+      <div class="form-group">
+        <label class="form-label">Reviewer Decision</label>
+        <div class="radio-group mt-2">
+          <label class="radio-option"><input type="radio" name="modalDecision" value="Accepted" checked> Accept AI Diagnosis</label>
+          <label class="radio-option"><input type="radio" name="modalDecision" value="Edited"> Edit & Correct</label>
+          <label class="radio-option"><input type="radio" name="modalDecision" value="Rejected"> Reject</label>
+        </div>
+      </div>
+      <div id="modalEditFields" style="display:none;">
+        <div class="form-group"><label class="form-label">Corrected Root Cause</label><textarea id="modalEditedRootCause" rows="3" class="form-textarea"></textarea></div>
+        <div class="form-group"><label class="form-label">Corrected Cisco CLI Commands</label><textarea id="modalEditedCliFix" rows="4" class="cli-editor" style="min-height:80px;"></textarea></div>
+        <div class="form-group"><label class="form-label">Error Taxonomy Category</label><select id="modalErrorCategory" class="form-select"><option>Unsafe Command / Destructive Risk</option><option>Security Baseline Violation</option><option>Architectural Misalignment</option><option>Over-Engineering / Teardown</option><option>Root Cause Misdiagnosis</option><option>Syntax Inaccuracy</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Reviewer Notes & Rationale</label><textarea id="modalReviewerNotes" rows="3" class="form-textarea" placeholder="Document technical reason for sign-off or changes..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btnCancelReview" class="btn btn-secondary">Cancel</button>
+      <button id="btnSubmitReviewFinal" class="btn btn-primary">Submit Verdict</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

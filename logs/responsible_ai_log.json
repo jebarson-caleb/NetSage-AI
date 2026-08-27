@@ -1,0 +1,93 @@
+[
+  {
+    "case_id": "NET-008",
+    "title": "NAT Overload (PAT) Keyword Omission",
+    "domain": "NAT / PAT",
+    "severity": "High",
+    "ai_initial_diagnosis": "Suggested clearing NAT translations and issuing a 'reload' command on the router to reset state table memory.",
+    "ai_failure_mode": "Dangerous Command Hallucination & Syntax Misunderstanding",
+    "error_taxonomy": "Unsafe Command / Destructive Risk",
+    "human_correction": "Reviewer rejected the 'reload' suggestion. Corrected the configuration by replacing the NAT rule with 'ip nat inside source list 1 interface GigabitEthernet0/1 overload'.",
+    "reviewer": "Alex Rivera (Lead Network Engineer)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "AI should never recommend router reloads for static configuration omissions. Human oversight prevented an unnecessary production network outage."
+  },
+  {
+    "case_id": "NET-018",
+    "title": "ACL Inverted Wildcard Mask Blocking Subnet",
+    "domain": "ACL / Security",
+    "severity": "High",
+    "ai_initial_diagnosis": "Recommended deleting Access-List 10 entirely with 'no access-list 10' and converting it to an Extended Named ACL from scratch.",
+    "ai_failure_mode": "Over-Engineering & Service Teardown",
+    "error_taxonomy": "Excessive Scope / Unnecessary Teardown",
+    "human_correction": "Reviewer edited the remediation script to use numbered sequence line replacement ('10 permit 192.168.10.0 0.0.0.255') without tearing down the existing security policy.",
+    "reviewer": "Samantha Chen (Senior CCIE Infrastructure)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "AI tended to recommend complete teardown instead of precise, non-disruptive sequence-based edits in Cisco ACLs."
+  },
+  {
+    "case_id": "NET-015",
+    "title": "OSPF Passive-Interface Default Suppressing Transit Link",
+    "domain": "OSPF Routing",
+    "severity": "High",
+    "ai_initial_diagnosis": "Suggested running 'no passive-interface default' under the OSPF routing process.",
+    "ai_failure_mode": "Security Baseline Violation",
+    "error_taxonomy": "Security Posture Degradation",
+    "human_correction": "Reviewer rejected disabling passive-interface default globally. Replaced with targeted 'no passive-interface GigabitEthernet0/0/0' to maintain LAN edge hardening.",
+    "reviewer": "David Okafor (Network Security Specialist)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "Global default settings in OSPF are intentional hardening measures. AI must make selective interface exemptions rather than weakening the global security baseline."
+  },
+  {
+    "case_id": "NET-003",
+    "title": "Missing IP Helper-Address for Remote DHCP Server",
+    "domain": "DHCP",
+    "severity": "High",
+    "ai_initial_diagnosis": "Suggested configuring a local DHCP scope on the branch router with 'ip dhcp pool VLAN30'.",
+    "ai_failure_mode": "Enterprise Architecture Context Oversight",
+    "error_taxonomy": "Architectural Misalignment",
+    "human_correction": "Reviewer changed remediation to 'interface G0/0.30' -> 'ip helper-address 192.168.10.100' to align with centralized enterprise IPAM.",
+    "reviewer": "Alex Rivera (Lead Network Engineer)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "AI should respect the existing centralized architecture rather than creating unmanaged local DHCP islands."
+  },
+  {
+    "case_id": "NET-029",
+    "title": "Static NAT Translation IP Overlap with Outside Router IP",
+    "domain": "NAT",
+    "severity": "High",
+    "ai_initial_diagnosis": "Suggested re-ip addressing the router's outside WAN interface GigabitEthernet0/1.",
+    "ai_failure_mode": "Cascading Dependency Inversion",
+    "error_taxonomy": "Dependency Inversion Risk",
+    "human_correction": "Reviewer modified the static NAT translation inside global address to 203.0.113.5 (free IP in provider pool), preserving ISP peering.",
+    "reviewer": "Samantha Chen (Senior CCIE Infrastructure)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "Changing ISP-facing WAN interface IPs breaks upstream provider routing; internal NAT mappings must be adjusted instead."
+  },
+  {
+    "case_id": "NET-022",
+    "title": "HSRP Virtual IP Address Mismatch",
+    "domain": "HSRP / Redundancy",
+    "severity": "Critical",
+    "ai_initial_diagnosis": "Diagnosed as an HSRP Priority issue and suggested changing standby priority on R2 without changing the virtual IP.",
+    "ai_failure_mode": "Superficial Symptom Treatment",
+    "error_taxonomy": "Root Cause Misdiagnosis",
+    "human_correction": "Reviewer rejected the priority-only fix. Corrected R2's virtual IP from 10.1.1.254 to match R1's 10.1.1.1.",
+    "reviewer": "David Okafor (Network Security Specialist)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "Split-brain active-active states in FHRP protocols are often caused by group VIP mismatches, which priority tuning alone cannot resolve."
+  },
+  {
+    "case_id": "NET-034",
+    "title": "Guest VLAN ACL Blocking DHCP Server Return Traffic",
+    "domain": "Wireless / ACL",
+    "severity": "High",
+    "ai_initial_diagnosis": "Suggested removing the 'ip access-group GUEST_IN in' command from interface G0/0.50.",
+    "ai_failure_mode": "Complete Security Isolation Removal",
+    "error_taxonomy": "Security Guardrail Breach",
+    "human_correction": "Reviewer rejected removing the ACL. Added specific permit entries for DHCP UDP ports 67/68 before the corporate deny statement.",
+    "reviewer": "Alex Rivera (Lead Network Engineer)",
+    "reviewer_verdict": "Edited",
+    "key_learning": "Removing security ACLs to fix connectivity is a critical failure mode. AI must craft minimal necessary permit rules."
+  }
+]
